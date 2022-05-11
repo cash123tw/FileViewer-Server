@@ -1,0 +1,51 @@
+server:
+  port: 9090
+
+root:
+  path: C:\Mine\Mavean
+
+setter:
+  reScan: false
+  hidePath: true
+
+tagName:
+  dir: Directory
+  file: File
+
+spring:
+  mvc:
+    view:
+      prefix: /page
+      suffix: .html
+#    static-path-pattern: rs/**
+
+  datasource:
+    username: root
+    url: jdbc:mysql://localhost:3306/File_Detail
+
+  jpa:
+    show-sql: true
+    generate-ddl: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.format_sql: true
+      hibernate.metadata_builder_contributor: App.Init.Init
+    open-in-view: false
+
+  sql:
+    init:
+      schema-locations:
+        - "classpath:sql/function.sql"
+      mode: always
+      separator: $$
+
+  thymeleaf:
+    cache: false
+    enable-spring-el-compiler: true
+    encoding: utf-8
+    mode: HTML
+    prefix: classpath:/static/page
+    suffix: .html
+
+

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width= device-width, initial-scale=1.0">
+    <title>Home - FileExplore v1.0</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+    <script th:src="@{/js/util.js}"></script>
+    <script th:src="@{/js/seeker.js}"></script>
+    <script th:src="@{/js/tag.js}"></script>
+    <script th:src="@{/js/detail.js}"></script>
+    <script th:src="@{/js/init.js}"></script>
+    <script th:src="@{/js/type_resolver.js}"></script>
+    <script th:src="@{/js/tag_type.js}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+          crossorigin="anonymous">
+    <link th:href="@{/css/normal.css}" rel="stylesheet">
+</head>
+<body>
+<nav th:fragment="head" class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
+    <div class="container">
+        <a class="navbar-brand " href="/">File Explore</a>
+        <button class="navbar-toggler" type="button" data-bs-target="#items" data-bs-toggle="collapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="items">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/explore">檔案檢視</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tag0/">標籤</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tagType/">標籤類型</a>
+                </li>
+            </ul>
+
+            <form class="d-flex">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <div class="row align-item-center">
+        <h1 class="col-12 text-center text-primary" th:text="${message}">
+            Welcome
+        </h1>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+</body>
+</html>
