@@ -16,6 +16,7 @@ public class FileDetailResult {
     private String file_name;
     private String file_path;
     private Set<FileType> file_types;
+    private FileType file_type;
     private Set<Tag> file_tags;
     private boolean isDir;
     private Map<String, Object> others;
@@ -28,14 +29,15 @@ public class FileDetailResult {
     public FileDetailResult(Integer file_id,
                             String file_name,
                             String file_path,
-                            Set<FileType> file_types,
+                            FileType file_type,
                             Set<Tag> file_tags,
                             boolean isDir) {
         this();
         this.file_id = file_id;
         this.file_name = file_name;
         this.file_path = file_path;
-        this.file_types = file_types;
+        this.file_types = new HashSet<>(){{add(file_type);}};
+        this.file_type = file_type;
         this.file_tags = file_tags;
         this.isDir = isDir;
     }

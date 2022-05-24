@@ -36,7 +36,7 @@ public class Tag0 {
     }
 
     @PostMapping()
-    public Tag newTag(@RequestBody Tag tag){
+    public Tag newTag(@RequestBody Tag tag) throws Exception {
         tag
                 = tagService.findOrCreate(tag);
         return tag;

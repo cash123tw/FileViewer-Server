@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Repository
@@ -27,5 +28,8 @@ public interface TagRepository extends CrudRepository<Tag,Integer> {
 
     @Query(value = "select t.* from tag t,tag_file_path tp where tp.file_path_id = ?1 AND tp.tag_id = t.id;",nativeQuery = true)
     Set<Tag> findTagByFilePathId(Integer id);
+
+    @Query("select t from Tag t where t.id in :ids or t.name in :names")
+    Set<Tag> findTagsInIdOrName(List<Integer> ids, List<String> names);
 
 }

@@ -1,6 +1,7 @@
 package Web.Controller;
 
 import Bean.FileDetail;
+import Data.Entity.FilePath;
 import Web.Bean.FileDetailResult;
 import Web.Bean.RequestResult;
 import Web.Service.FileGet.Serv_GetFile_FromDataBase;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,99 +21,62 @@ import java.util.Objects;
 public class Controller_FileExplore {
 
     @Autowired
-    private Serv_GetFile_FromDataBase fileService;
+    private Serv_GetFile_FromDatabase_Impl fileService;
 
-    @GetMapping({"", "/*"})
+    @GetMapping({"/"})
     public ModelAndView requestWebPage(ModelAndView mav) {
         mav.setViewName("/seeker");
         return mav;
     }
 
-    @PostMapping("/list")
-    public RequestResult getListFile(
-            @RequestParam(name = "path", required = false, defaultValue = "0") int path) {
-        try {
-            RequestResult<List<FileDetailResult>> fileList
-                    = fileService.listFile(path);
-            log.info(String.format("List [%s]", path));
-            return fileList;
-
-        } catch (Exception e) {
-            return handleException(e, "Error form list file.");
+    /**
+     * Get file list by root id.
+     */
+    @GetMapping("")
+    public List<FilePath> getAllFilePath(
+            @RequestParam(required = false) Integer id,
+            @RequestParam(required = false, defaultValue = "/") String path) {
+        List<FilePath> result;
+        if (Objects.nonNull(id)) {
+            result = fileService.listFile(id);
+        } else {
+            result = fileService.listFile(path);
         }
-    }
 
-    @PostMapping("/search")
-    public RequestResult searchFile(@RequestParam(name = "path", required = false, defaultValue = "1") int path,
-                                    @RequestParam(name = "fileName") String fileName) {
-
-        try {
-            log.info(String.format("Search file in path [%s] file name : [%s]", path, fileName));
-            RequestResult<List<FileDetailResult>> result
-                    = fileService.searchFile(path, fileName);
-            return result;
-        } catch (Exception e) {
-            return handleException(e, "Error from search file.");
-        }
-    }
-
-    @GetMapping(value = "/detail/{id}")
-    public ModelAndView getFileDetailPage(@PathVariable(name = "id") Integer id, ModelAndView mav) {
-        mav.setViewName("/detail");
-        return mav;
-    }
-
-    @PostMapping(value = "/detail/{id}")
-    public RequestResult getFileDetail(@PathVariable(name = "id") Integer id) {
-        RequestResult result = null;
-
-        try {
-            result
-                    = fileService.getFile(id);
-        } catch (Exception e) {
-            result = handleException(e, String.format("Get File ID : [%d] Error", id));
-            e.printStackTrace();
-        }
+        result.stream()
+                .forEach(this::ensureParentPathNotLoopGet);
 
         return result;
     }
 
-    @PostMapping("/back_by_path")
-    public RequestResult moveBackByPath(@RequestParam(name = "path",required = false,defaultValue = "") String path){
-        RequestResult<List<FileDetailResult>> result
-                = fileService.getPathDirectory(path);
-        log.info(String.format("For back List [%s]",path));
+    /**
+     * Search in path by file name.
+     */
+    @GetMapping("/search")
+    public List<FilePath> searchFile(String path, String fileName) {
+        List<FilePath> result
+                = fileService.searchFile(path, fileName);
+        result.stream()
+                .forEach(this::ensureParentPathNotLoopGet);
         return result;
     }
 
-    @PostMapping("/back")
-    public RequestResult moveBackFileList(@RequestParam(name = "path", required = false) int path) {
-        int id = 1;
-        RequestResult<FileDetailResult> result
-                = fileService.getFile(path);
-        FileDetailResult f1
-                = result.getObj();
-        if (Objects.nonNull(f1)) {
-            Object parent
-                    = f1.getOthers("parent");
-            if (Objects.nonNull(parent)) {
-                id = ((FileDetailResult) parent).getFile_id();
-            }
-        }
-
-        return getListFile(id);
+    @GetMapping("/back")
+    public List<FilePath> backToPath(String path) {
+        List<FilePath> result
+                = getAllFilePath(null, path);
+        result.stream()
+                .forEach(this::ensureParentPathNotLoopGet);
+        return result;
     }
 
-    public RequestResult<String>
-    handleException(Exception e, String message) {
-        RequestResult<String> result
-                = new RequestResult<>();
-
-        result.setResult(RequestResult.RequestResultType.FAIL);
-        result.setMessage(message);
-        result.setObj(e.getMessage());
-
-        return result;
+    public FilePath ensureParentPathNotLoopGet(FilePath filePath) {
+        filePath.setParentPath(null);
+//        FilePath parentPath = filePath.getParentPath();
+//        if (Objects.nonNull(parentPath)) {
+//            parentPath.setParentPath(null);
+//        }
+        return filePath;
     }
 
 }

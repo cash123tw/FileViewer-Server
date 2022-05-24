@@ -10,6 +10,7 @@ public class RestControllerAdvice {
 
     @ExceptionHandler
     public ResponseEntity<Object> restExceptionHandler(Exception e){
+        e.printStackTrace();
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .contentType(MediaType.APPLICATION_JSON)

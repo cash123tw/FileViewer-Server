@@ -44,7 +44,7 @@ function split_dot(strs) {
 /**
  data: use json mode.
  domElement: where data set to,function will find childElement and check rely attribute's value is present in data,
- and set to element attribute `value`
+ and set to element attribute `value`.
  relyAttribute: let function know which attribute value you want to find in `data`.
  setToAttribute: which attribute value set to.
  focusElement: let function know which domElement child need to be set data.

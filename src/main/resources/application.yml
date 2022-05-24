@@ -2,17 +2,19 @@ server:
   port: 9090
 
 root:
-  path: C:\Mine\Mavean
-
-setter:
-  reScan: false
-  hidePath: true
+  path: C:\Users\BabyPig\IdeaProjects
 
 tagName:
   dir: Directory
   file: File
 
+setter:
+  start-mode: non
+  hidePath: true
+
 spring:
+  main:
+    allow-circular-references: true
   mvc:
     view:
       prefix: /page
@@ -25,9 +27,9 @@ spring:
 
   jpa:
     show-sql: true
-    generate-ddl: false
-    hibernate:
-      ddl-auto: update
+    generate-ddl: true
+#    hibernate:
+#      ddl-auto: create
     properties:
       hibernate.format_sql: true
       hibernate.metadata_builder_contributor: App.Init.Init

@@ -9,7 +9,10 @@ import Web.Service.TypeEditor.Serv_Type_Impl;
 import com.sun.istack.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,89 +27,78 @@ public class Serv_GetFile_FromDatabase_Impl implements Serv_GetFile_FromDataBase
     private FileType dir_type;
 
     @Override
-    public RequestResult<List<FileDetailResult>> listFile(@NotNull Integer root_id) {
-        root_id =
-                (root_id == null) ? 0 : root_id;
-        List<FileDetailResult> list
-                = null;
-        RequestResult<List<FileDetailResult>> result;
+    public List<FilePath> listFile(@NotNull Integer root_id) {
 
-        try {
-            List<FilePath> paths;
-            if (root_id == 0) {
-                paths = filePathRepository
-                        .ListRootChild();
-            } else {
-                paths = filePathRepository
-                        .findChildById(Arrays.asList(root_id));
-            }
-            list = paths
-                    .stream()
-                    .map(this::transferFilePath2FileFileDetailResult)
-                    .collect(Collectors.toList());
-
-            result = createRequestResult(true, list, root_id + "");
-        } catch (Exception e) {
-            result = createRequestResult(false, null, e.getMessage());
+        List<FilePath> paths;
+        if (root_id == null) {
+            paths = filePathRepository
+                    .ListRootChild();
+        } else {
+            paths = filePathRepository
+                    .findChildById(Arrays.asList(root_id));
         }
-        return result;
+
+        return paths;
+    }
+
+    public List<FilePath> listFile(@NotNull String path) {
+        FilePath filePath
+                = filePathRepository.findFilePathByPath(Paths.get(path));
+        return listFile(filePath.getId());
     }
 
     @Override
-    public RequestResult<List<FileDetailResult>> searchFile(Integer root_id, String fileName) {
+    public List<FilePath> searchFile(Integer root_id, String fileName) {
 
-        List<FilePath> filePaths
+        List<Integer> ids
                 = filePathRepository.findAllByRootIdAndFileName(root_id, fileName);
 
-        List<FileDetailResult> lists = filePaths
-                .stream()
-                .map(this::transferFilePath2FileFileDetailResult)
-                .collect(Collectors.toList());
+        List<FilePath> lists =
+                filePathRepository.findFilePathsByIdIsInIds(ids);
 
-        RequestResult<List<FileDetailResult>> result
-                = createRequestResult(true, lists, root_id + "");
+        return lists;
+    }
 
-        return result;
+    public List<FilePath> searchFile(String path, String fileName) {
+
+        FilePath target
+                = filePathRepository.findFilePathByPathIsDirType0(Paths.get(path), getDirType().getTypeName());
+        List<Integer> ids
+                = filePathRepository.findAllByRootIdAndFileName(target.getId(), fileName);
+
+        List<FilePath> lists =
+                filePathRepository.findFilePathsByIdIsInIds(ids);
+
+        return lists;
+    }
+
+    public void deleteFilePath(Integer id) throws FileNotFoundException {
+        FilePath filePath = getFile(id);
+        deleteFilePath(filePath);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteFilePath(FilePath filePath) {
+        filePathRepository.delete(filePath);
     }
 
     @Override
-    public RequestResult<FileDetailResult> getFile(Integer id) {
+    public FilePath getFile(Integer id) throws FileNotFoundException {
 
-        RequestResult<FileDetailResult> result;
         FilePath file
                 = filePathRepository.findByIdAll(id);
 
         if (Objects.nonNull(file)) {
-            FilePath parent
-                    = file.getParentPath();
-            FileDetailResult obj
-                    = transferFilePath2FileFileDetailResult(file);
-            obj.setFile_tags(file.getTags(true));
-            result = createRequestResult(true, obj, id + "");
-
-            if (Objects.nonNull(parent)) {
-                result.getObj().addOthers("parent",
-                        new FileDetailResult(
-                                parent.getId(),
-                                parent.getFile_name(),
-                                parent.getPath(),
-                                null,
-                                null,
-                                true
-                        )
-                );
-            }
+            return file;
         } else {
-            result = createRequestResult(false, null, "File not Exists");
+            throw new FileNotFoundException("File Not Exists");
         }
-
-        return result;
     }
 
-    public RequestResult<List<FileDetailResult>> getPathDirectory(String path) {
-        RequestResult<List<FileDetailResult>> result;
+    public List<FilePath> getPathDirectory(String path) {
+        List<FilePath> result;
         if (path == null || path.equals("/") || path.equals("")) {
-            result = listFile(null);
+            result = listFile("/");
         } else {
             FilePath filePath
                     = filePathRepository.findPathIsDirType(Paths.get(path), getDirType().getTypeName());
@@ -133,22 +125,18 @@ public class Serv_GetFile_FromDatabase_Impl implements Serv_GetFile_FromDataBase
 
     public FileDetailResult transferFilePath2FileFileDetailResult(FilePath filePath) {
 
-        String path = null;
         FilePath parent
                 = filePath.getParentPath();
-        Set<FileType> types
+        FileType fileType
                 = filePath.getFileType();
         boolean dir
-                = types.contains(getDirType());
-        if (parent != null) {
-            path = parent.getPath();
-        }
+                = fileType.equals(getDirType());
 
         FileDetailResult result = new FileDetailResult(
                 filePath.getId(),
                 filePath.getFile_name(),
-                path,
-                types,
+                filePath.getPath(),
+                fileType,
                 filePath.getTags(),
                 dir
         );

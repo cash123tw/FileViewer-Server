@@ -8,18 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
           crossorigin="anonymous">
-    <script>
-        $(window).load(() => {
-            let set = {
-                file_id: $('#file_id'),
-                file_name: $('#file_name'),
-                file_path: $('#file_path'),
-                file_types: $('#file_types'),
-                file_tags: $('#file_tags'),
-            }
-            init_detail(set);
-        })
-    </script>
 </head>
 <body>
 <div th:replace="/main.html::head"></div>
@@ -28,15 +16,19 @@
         <div class="">
             <h1 class="d-inline px-5 bg-primary bg-gradient text-white rounded">檔案資訊</h1>
         </div>
-        <div class="align-self-center bg-gradient rounded p-3">
-            <input class="" hidden="hidden" id="file_id"/>
-            <p>名稱 : <input readonly="readonly" id="file_name"/></p>
-            <p>路徑 : <input readonly="readonly" id="file_path"/></p>
+        <div class="align-self-center bg-gradient rounded p-3" th:object="${data}">
+            <input class="" hidden="hidden" id="file_id" th:value="*{id}"/>
+            <p>名稱 : <input readonly="readonly" id="file_name" th:value="*{file_name}"/></p>
+            <p>路徑 : <input readonly="readonly" id="path" th:value="*{path}"/></p>
             <div id="file_types" class="m-2">
-                <p style="display: inline">類型 :</p>
+                類型 :
+                <p style="display: inline" th:text="*{fileType.typeName}"></p>
             </div>
             <div id="file_tags" class="m-2">
                 標籤 :
+                <th:block th:each ="tag:*{tags}">
+                    <span th:text="${tag.name}"></span>
+                </th:block>
             </div>
         </div>
     </div>

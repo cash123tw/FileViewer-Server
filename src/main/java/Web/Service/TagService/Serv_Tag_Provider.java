@@ -14,7 +14,7 @@ public interface Serv_Tag_Provider {
 
     Tag saveTag(Tag tag);
 
-    Tag findOrCreate(Tag tag);
+    Tag findOrCreate(Tag tag) throws Exception;
 
     Tag findOne(String name);
 

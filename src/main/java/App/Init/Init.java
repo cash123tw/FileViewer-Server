@@ -1,6 +1,7 @@
 package App.Init;
 
 import Web.Service.LocalFileWalker.Serv_localWalk_impl;
+import lombok.NoArgsConstructor;
 import org.hibernate.boot.MetadataBuilder;
 import org.hibernate.boot.spi.MetadataBuilderContributor;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
@@ -11,11 +12,14 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-@Component
+@NoArgsConstructor
 public class Init implements ApplicationListener<ContextRefreshedEvent>, MetadataBuilderContributor {
 
-    @Value("${setter.reScan}")
     boolean reScan;
+
+    public Init(boolean reScan) {
+        this.reScan = reScan;
+    }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {

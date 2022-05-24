@@ -19,6 +19,17 @@
           crossorigin="anonymous">
     <link th:href="@{/css/normal.css}" rel="stylesheet">
 </head>
+<script>
+    $(window).on('load',()=>{
+        let a = $("#items").find('a');
+        for (let i = 0; i < a.length; i++) {
+            let aa = a[i];
+            let key = a.attr('name');
+            let url = URLS.view[key];
+            $(aa).attr('href',url)
+        }
+    })
+</script>
 <body>
 <nav th:fragment="head" class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
     <div class="container">
@@ -30,13 +41,13 @@
         <div class="collapse navbar-collapse" id="items">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="/explore">檔案檢視</a>
+                    <a class="nav-link" name='explore' href="/explore/">檔案檢視</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/tag0/">標籤</a>
+                    <a class="nav-link" name='tag' href="/tag0/">標籤</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/tagType/">標籤類型</a>
+                    <a class="nav-link" name='tagType' href="/tagType/">標籤類型</a>
                 </li>
             </ul>
 

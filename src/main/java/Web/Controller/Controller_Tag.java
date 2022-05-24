@@ -6,6 +6,9 @@ import Web.Bean.RequestResult;
 import Web.Service.TagService.Serv_Tag_Provider;
 import Web.Service.TypeEditor.Serv_Tag_Type;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -90,7 +93,6 @@ public class Controller_Tag {
         }
     }
 
-    @Transactional
     @PostMapping("/create")
     public RequestResult addNewTagList(@RequestBody List<Tag> tags) {
         RequestResult result = null;
@@ -109,7 +111,7 @@ public class Controller_Tag {
     }
 
     @PostMapping("/create1")
-    public RequestResult addNewTag(@RequestBody Tag tag) {
+    public RequestResult addNewTag(@RequestBody Tag tag) throws Exception {
         RequestResult result = addNewTagList(Arrays.asList(tag));
         if (result.getResult().equals(RequestResult.RequestResultType.SUCCESS)) {
             List<Tag> tags = (List<Tag>) result.getObj();

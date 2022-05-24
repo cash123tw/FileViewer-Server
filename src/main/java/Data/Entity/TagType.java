@@ -20,11 +20,8 @@ public class TagType {
     @NonNull
     private String typeName;
     private String comment;
-//    @OneToMany(fetch = FetchType.LAZY,mappedBy = "tagType")
-//    private Set<Tag> tags;
 
     public TagType() {
-        this("default");
     }
 
     public TagType(String typeName, String comment) {

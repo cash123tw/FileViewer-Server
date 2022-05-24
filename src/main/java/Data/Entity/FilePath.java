@@ -5,6 +5,8 @@ import lombok.Data;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Subselect;
+import org.springframework.validation.ObjectError;
 
 import javax.persistence.*;
 import java.io.File;
@@ -12,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -47,8 +50,14 @@ import java.util.Set;
                 name = "FilePath.findAll",
                 attributeNodes = {
                         @NamedAttributeNode(value = "tags"),
-                        @NamedAttributeNode(value = "parentPath")
+                        @NamedAttributeNode(value = "parentPath"),
+                        @NamedAttributeNode(value = "fileType")
                 }
+//                subgraphs = @NamedSubgraph(name="fileType",
+//                attributeNodes = {
+//                        @NamedAttributeNode("id"),
+//                        @NamedAttributeNode("typeName")
+//                })
         )
 })
 public class FilePath {
@@ -57,6 +66,7 @@ public class FilePath {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String file_name;
+    private UUID version;
 
     @Convert(converter = PathConvert.class)
     private Path path;
@@ -68,18 +78,8 @@ public class FilePath {
             foreignKey = @ForeignKey(name = "parent_connect"))
     private FilePath parentPath;
 
-    @ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "Type_and_Path",
-            joinColumns = {@JoinColumn(name = "file_id")},
-            inverseJoinColumns = {@JoinColumn(name = "type_id")},
-            foreignKey = @ForeignKey(name = "file_type_ids"),
-            inverseForeignKey = @ForeignKey(name = "type_file_ids"))
-    @Fetch(FetchMode.SUBSELECT)
-    private Set<FileType> fileType;
-
-    @ManyToMany()
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
+    @ManyToMany
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     @JoinTable(
             name = "Tag_FilePath",
             joinColumns = {@JoinColumn(name = "filePath_id")},
@@ -89,6 +89,13 @@ public class FilePath {
     )
     @Fetch(FetchMode.SUBSELECT)
     private Set<Tag> tags;
+    @OneToOne(fetch = FetchType.EAGER)
+    private FileType fileType;
+
+    public FilePath() {
+        this.tags = new HashSet<>();
+        this.version = UUID.randomUUID();
+    }
 
     public FilePath(Integer id, String file_name) {
         this(file_name, null, null);
@@ -101,14 +108,7 @@ public class FilePath {
         this();
         this.file_name = file_name;
         this.path = path;
-        if (this.fileType == null) {
-            this.fileType = new HashSet<>();
-        }
-        this.fileType.add(fileType);
-    }
-
-    public FilePath() {
-        this.tags = new HashSet<>();
+        this.fileType = fileType;
     }
 
     public String getPath() {
@@ -120,35 +120,16 @@ public class FilePath {
     }
 
     public Set<Tag> getTags() {
-        return getTags(false);
+        return tags;
     }
 
-    public Set<Tag> getTags(boolean io) {
-        if (!io) return null;
-        else return tags;
-    }
-
-    public Set<FileType> getFileType() {
-        if (fileType == null) {
-            fileType = createFileSet();
-        }
-        return fileType;
-    }
-
-    public void setFileType(Set<FileType> fileType) {
-        this.fileType = fileType;
-    }
-
-    public void setFileType1(FileType fileType) {
-        getFileType().add(fileType);
-    }
+//    public Set<Tag> getTags(boolean io) {
+//        if (!io) return null;
+//        else return tags;
+//    }
 
     public void addTag(Tag tag) {
-        getTags(true).add(tag);
-    }
-
-    public Set<FileType> createFileSet() {
-        return new HashSet<>();
+        getTags().add(tag);
     }
 
 }

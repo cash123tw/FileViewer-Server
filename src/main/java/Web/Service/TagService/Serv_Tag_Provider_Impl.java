@@ -6,7 +6,10 @@ import Data.Repository.TagRepository;
 import Web.Service.TypeEditor.Serv_Tag_Type_Impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityExistsException;
 import java.util.*;
 
 import static java.lang.String.*;
@@ -44,7 +47,7 @@ public class Serv_Tag_Provider_Impl implements Serv_Tag_Provider {
     }
 
     @Override
-    public Tag findOrCreate(Tag tag) {
+    public Tag findOrCreate(Tag tag) throws Exception {
         Tag target = null;
 
         if (Objects.isNull(tag)) {
@@ -72,10 +75,22 @@ public class Serv_Tag_Provider_Impl implements Serv_Tag_Provider {
         }
 
         if (Objects.nonNull(tagType)) {
+            Integer type_id
+                    = tagType.getId();
             tagTypeName
                     = tagType.getTypeName();
-            tagType
-                    = tagTypeService.findTagOrCreateOne(tagTypeName);
+            if(Objects.nonNull(type_id)){
+                Optional<TagType> opt_type
+                        = tagTypeService.findTagTypeById(type_id);
+                if (opt_type.isEmpty()) {
+                    throw new EntityExistsException("TagType is not present");
+                }else{
+                    tagType = opt_type.get();
+                }
+            }else {
+                tagType
+                        = tagTypeService.findTagOrCreateOne(tagTypeName);
+            }
         }
 
         target
@@ -144,7 +159,7 @@ public class Serv_Tag_Provider_Impl implements Serv_Tag_Provider {
         return tag;
     }
 
-    public Tag findOrCreate(String tagName, String tagComment, String tagType, String typeComment) {
+    public Tag findOrCreate(String tagName, String tagComment, String tagType, String typeComment) throws Exception {
 
         Tag tag
                 = new Tag(tagName, new TagType(tagType, typeComment));
@@ -162,6 +177,43 @@ public class Serv_Tag_Provider_Impl implements Serv_Tag_Provider {
         }
 
         return tags;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Set<Tag> saveTagsIfNotPresent(Set<Tag> tags){
+        ArrayList<Integer> ids
+                = new ArrayList<>();
+        Map<String,Tag> names
+                = new HashMap<>();
+
+        tags.forEach(t->{
+            Integer id = t.getId();
+            String name = t.getName();
+
+            if(Objects.nonNull(id)){
+                ids.add(id);
+            }else if (Objects.nonNull(name)){
+                names.put(name,t);
+            }else{
+                throw new IllegalArgumentException("Id And name both is null !!");
+            }
+        });
+
+        Set<Tag> compareResult
+                = tagRepository.findTagsInIdOrName(ids, names.keySet().stream().toList());
+        compareResult.forEach(tag->{
+            String name = tag.getName();
+            if(names.containsKey(name)){
+                names.remove(name);
+            }
+        });
+
+        names.forEach((key,value)->{
+            Tag tag = saveTag(value);
+            compareResult.add(tag);
+        });
+
+        return compareResult;
     }
 
     public void CheckNonEmpty(Tag tag) {

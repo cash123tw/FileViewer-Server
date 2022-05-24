@@ -1,6 +1,7 @@
 package Data.Entity;
 
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -15,32 +16,25 @@ public class Tag {
     @Column(unique = true)
     private String name;
     private String comment;
+
     @ManyToOne(fetch = FetchType.EAGER)
-//    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-//            org.hibernate.annotations.CascadeType.MERGE})
     @JoinColumn(name = "type_id",
             referencedColumnName = "id",
             foreignKey = @ForeignKey(name = "tag_type_connect"))
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     private TagType tagType;
-//
-//    @ManyToMany()
-//    @JoinTable(
-//            name = "Tag_FilePath",
-//            joinColumns = {@JoinColumn(name = "tag_id")},
-//            inverseJoinColumns = {@JoinColumn(name = "filePath_id")},
-//            foreignKey = @ForeignKey(name = "tag2FilePath"),
-//            inverseForeignKey = @ForeignKey(name = "FilePath2tag")
-//    )
-//    @Cascade(org.hibernate.annotations.CascadeType.REFRESH)
-//    @JsonIgnore
-//    private Set<FilePath> filePaths;
 
     public Tag() {
         this("");
     }
 
+    public Tag(Integer id) {
+        this("");
+        this.id = id;
+    }
+
     public Tag(String name) {
-        this(name, new TagType("default"));
+        this.name = name;
     }
 
     public Tag(String name, TagType tagType) {

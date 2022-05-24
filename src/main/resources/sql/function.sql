@@ -35,7 +35,7 @@ CREATE PROCEDURE `find_child_by_root`(
     IN `f_name` VARCHAR(100)
         )
 BEGIN
-SELECT f.*,l FROM(
+SELECT f.id FROM(
                      SELECT @ids AS _ids,
                 (SELECT (@ids := GROUP_CONCAT(id)) FROM file_path WHERE FIND_IN_SET(parent,@ids)) AS cid ,
                 (SELECT @c:=@c+1	) AS l FROM file_path,

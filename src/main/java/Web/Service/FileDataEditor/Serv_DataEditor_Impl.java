@@ -1,6 +1,7 @@
 package Web.Service.FileDataEditor;
 
 import Bean.FileDetail;
+import Bean.FileType;
 import Bean.PathProvider;
 import Data.Entity.FilePath;
 import Data.Entity.Tag;
@@ -29,9 +30,9 @@ import java.util.Set;
 public class Serv_DataEditor_Impl implements Serv_DataEditor {
 
     @Value("${tagName.dir}")
-    private String TAG_NAME_DIR;
+    public String TAG_NAME_DIR;
     @Value("${tagName.file}")
-    private String TAG_NAME_FILE;
+    public String TAG_NAME_FILE;
 
     private FileExploreWorker exploreWorker;
     private FilePathRepository filePathRep;
@@ -78,21 +79,17 @@ public class Serv_DataEditor_Impl implements Serv_DataEditor {
     @Override
     public boolean saveDataToDataBase(FileDetail fileDetail, Set<Tag> tags) {
         try {
+            if (checkFileExists(fileDetail)) {
+                return true;
+            }
             FilePath filePath;
             Tag tag = null;
-            String tagType;
 
             if (isDirectory(fileDetail)) {
                 filePath = DetailToFilePathByDir(fileDetail);
-                tagType = TAG_NAME_DIR;
-                tag
-                        = tagService
-                        .findOrCreate(filePath.getFile_name(), null, tagType, null);
             } else {
                 filePath = DetailToFilePathByFile(fileDetail);
-                tagType = TAG_NAME_FILE;
             }
-
 
             getTags(filePath);
             filePath.addTag(tag);
@@ -111,7 +108,6 @@ public class Serv_DataEditor_Impl implements Serv_DataEditor {
             log.warning(e.getMessage());
             return false;
         }
-
         return true;
     }
 
@@ -139,25 +135,26 @@ public class Serv_DataEditor_Impl implements Serv_DataEditor {
     public FilePath DetailToFilePathByFile(FileDetail fileDetail) {
         String typeName
                 = fileDetail.getTypeName();
-        String path
-                = fileDetail.getFilePath();
         String path_to_save
-                = removeTypeFromPath(path);
+                = fileDetail.getFilePath();
+        String fileName
+                = fileDetail.getFileName();
         FilePath filePath
                 = filePathRep
                 .findFilePathByPathExcludeDirType0(transferPath(path_to_save), TAG_NAME_DIR);
+        if (typeName == null || typeName.isEmpty() || typeName.equals("null")) {
+            typeName = TAG_NAME_FILE;
+        }
 
         if (Objects.isNull(filePath)) {
             filePath = new FilePath(
-                    removeTypeFromPath(fileDetail.getFileName()),
+                    removeTypeFromPath(fileName),
                     Path.of(path_to_save),
                     null
             );
         }
 
-        filePath.setFileType1(
-                typeService.findTypeOrCreate(typeName)
-        );
+        filePath.setFileType(typeService.findTypeOrCreate(typeName));
 
         return filePath;
     }
@@ -170,45 +167,45 @@ public class Serv_DataEditor_Impl implements Serv_DataEditor {
         if (count > 0) {
             String origin
                     = path.getName(count - 1).toString();
-            String replace;
-            int i
-                    = origin.lastIndexOf('.');
-            if (i != -1) {
-                replace = origin.substring(0, i);
-                file_path = file_path.replace(origin, replace);
+            String replace = origin;
+
+            if (!origin.startsWith(".")) {
+                int i
+                        = origin.lastIndexOf('.');
+                if (i != -1) {
+                    replace = origin.substring(0, i);
+                }
             }
+            file_path = file_path.replace(origin, replace);
         }
         return file_path;
     }
 
-    public FilePath findParentPath(FileDetail fileDetail, FilePath filePath) throws IllegalAccessException, FileNotFoundException {
+    public FilePath findParentPath(FileDetail fileDetail, FilePath filePath) {
         FilePath parentPath
                 = filePath.getParentPath();
         if (Objects.isNull(parentPath)) {
-            String target = "";
             Path path
                     = Paths.get(filePath.getPath());
             Path parent
                     = path.getParent();
             if (parent == null || "".equals(parent)) {
                 filePath.setPath("/");
-            } else {
-                target = parent.toString();
             }
 
-            parentPath = filePathRep.findFilePathByPath(target);
+            parentPath = filePathRep.findFilePathByPath(parent);
         }
         filePath.setParentPath(parentPath);
         return filePath;
     }
 
-    public Tag createTag(String tagName, String tagType) {
+    public Tag createTag(String tagName, String tagType) throws Exception {
         Tag tag
                 = tagService.findOrCreate(tagName, null, tagType, null);
         return tag;
     }
 
-    public Tag createTag(Path path, String tagType) {
+    public Tag createTag(Path path, String tagType) throws Exception {
         int count
                 = path.getNameCount();
         String tagName;
@@ -236,6 +233,14 @@ public class Serv_DataEditor_Impl implements Serv_DataEditor {
         return file;
     }
 
+    public boolean checkFileExists(FileDetail fileDetail) {
+        FilePath filePath = filePathRep
+                .findFilePathByPathAndFileTypeName
+                        (Paths.get(fileDetail.getFilePath()),
+                                fileDetail.getType().equals(FileType.DIR) ? TAG_NAME_DIR : TAG_NAME_FILE);
+        return Objects.nonNull(filePath);
+    }
+
     public boolean isDirectory(FileDetail fileDetail) {
         Bean.FileType type
                 = fileDetail.getType();
@@ -245,5 +250,6 @@ public class Serv_DataEditor_Impl implements Serv_DataEditor {
     public static Path transferPath(String path) {
         return Path.of(path);
     }
+
 
 }
