@@ -103,18 +103,6 @@
                     </tbody>
                 </table>
             </div>
-            <script>
-                function dup() {
-                    let data = $('#data_template');
-                    let area = $("#data_part");
-                    for (let i = 0; i < 100; i++) {
-                        let tmp = data.clone();
-                        tmp.removeAttr('hidden');
-                        tmp.find('th[name="name"]').text('A' + i);
-                        area.append(tmp);
-                    }
-                }
-            </script>
             </table>
         </div>
     </div>

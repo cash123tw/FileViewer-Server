@@ -1,8 +1,6 @@
 import App.AppStarter;
 import Data.Entity.FilePath;
-import Data.Entity.FileType;
 import Data.Entity.Tag;
-import Data.Entity.TagType;
 import Data.Repository.FilePathRepository;
 import Data.Repository.TagRepository;
 import Data.Repository.TagTypeRepository;
@@ -13,43 +11,23 @@ import Web.Service.LocalFileWalker.Serv_localWalk_impl;
 import Web.Service.TagService.Serv_Tag_Provider_Impl;
 import Web.Service.TypeEditor.Serv_Type_Impl;
 import Worker.FileExploreWorker;
-import com.sun.source.doctree.IndexTree;
 import org.assertj.core.util.Lists;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.TransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.awt.*;
+import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 
 @SpringBootTest(classes = AppStarter.class)
 @AutoConfigureMockMvc
@@ -135,19 +113,5 @@ public class Tester {
     FileUpload u;
     @Autowired
     Serv_GetFile_FromDatabase_Impl fs;
-
-    @Test
-//    @Transactional
-    public void test3() throws Exception {
-        FilePath filePath = fr.findById(3).get();
-//        filePath.setParentPath(null);
-//        filePath = fr.save(filePath);
-        fr.delete(filePath);
-    }
-
-    public static void main(String[] args) throws URISyntaxException {
-        URI uri = new URI("/");
-        System.out.println(uri.getPath());
-    }
 
 }

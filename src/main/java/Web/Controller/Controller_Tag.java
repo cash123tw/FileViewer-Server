@@ -1,16 +1,11 @@
 package Web.Controller;
 
 import Data.Entity.Tag;
-import Data.Entity.TagType;
 import Web.Bean.RequestResult;
 import Web.Service.TagService.Serv_Tag_Provider;
 import Web.Service.TypeEditor.Serv_Tag_Type;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -72,14 +67,16 @@ public class Controller_Tag {
         return result;
     }
 
-    @GetMapping(value =  "/relateTagType/{id}",produces = "application/json")
-    public String getAllByTagType(@PathVariable("id") Integer id, HttpServletResponse response) {
+    @GetMapping(value = "/relateTagType/{id}", produces = "application/json")
+    public String getAllByTagType(@PathVariable(value = "id",required = false) Integer id,
+                                  @RequestParam(value = "name", required = false) String tagName,
+                                  HttpServletResponse response) {
         try {
-            List<Tag> result
-                    = tagService.findByTagType(id);
+            List<Tag> result = tagService.findByTagTypeAndTagName(id, tagName);
+
             return mapper.writeValueAsString(result);
         } catch (Exception e) {
-            return tagType_controller.handleException(response,e);
+            return tagType_controller.handleException(response, e);
         }
     }
 

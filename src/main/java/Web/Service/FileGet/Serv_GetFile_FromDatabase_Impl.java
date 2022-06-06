@@ -95,6 +95,10 @@ public class Serv_GetFile_FromDatabase_Impl implements Serv_GetFile_FromDataBase
         }
     }
 
+    public FilePath getFileByFilePath(String path){
+        return filePathRepository.findFilePathByPath(Paths.get(path));
+    }
+
     public List<FilePath> getPathDirectory(String path) {
         List<FilePath> result;
         if (path == null || path.equals("/") || path.equals("")) {

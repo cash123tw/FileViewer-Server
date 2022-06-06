@@ -54,9 +54,11 @@ public class Serv_localWalk_impl implements Serv_localServWalk{
         return walkLocalFile(new Predicate<File>() {
             @Override
             public boolean test(File file) {
-                FileDetail fileDetail
-                        = worker.getPathProvider().makeFileDetail(file);
-                dataEditor.saveDataToDataBase(fileDetail);
+                if(!file.getName().startsWith(".")) {
+                    FileDetail fileDetail
+                            = worker.getPathProvider().makeFileDetail(file);
+                    dataEditor.saveDataToDataBase(fileDetail);
+                }
                 return false;
             }
         });

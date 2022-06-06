@@ -10,9 +10,11 @@ import org.hibernate.type.StandardBasicTypes;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @NoArgsConstructor
+@Order(2)
 public class Init implements ApplicationListener<ContextRefreshedEvent>, MetadataBuilderContributor {
 
     boolean reScan;

@@ -5,6 +5,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width= device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
     <title>Finder - FileExplore v1.0</title>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -33,14 +36,29 @@
                 detail: 'detail',
                 forward: 'forward',
                 back: 'back'
+            },
+            btn: {
+                upload: $('#upload_file')
             }
         })
+
     })
 
     function seeker0_init(setting) {
         SEEKER_SETTING = setting;
-        seeker0_list_file(null, '/');
-        seeker0_addPath('');
+        try {
+            let move = $('#stat')[0].dataset.move;
+            SEEKER_SETTING.move = move;
+        } catch (e) {
+        }
+
+        if (SEEKER_SETTING.move === 'search') {
+            seeker0_listen_tr_click();
+            console.log('search ok')
+        } else {
+            seeker0_list_file(null, '/');
+            seeker0_addPath('');
+        }
     }
 
     function seeker0_list_file(id, path) {
@@ -70,6 +88,7 @@
             = SEEKER_SETTING.area.data;
         data_area.html('');
         data_area.append(template);
+        seeker0_upload_listen();
 
         for (let i = 0; i < data.length; i++) {
             let d = data[i];
@@ -79,21 +98,25 @@
             let span = tmp.find('span[name="template"]');
             tmp.removeAttr('hidden');
             tmp.removeAttr('id');
+            tmp.on('click', seeker0_act_click);
+            // tmp.css({cursor: 'pointer'});
             set_data_to_target_with_json(d, tmp, 'name', ['text', 'value'], ['td']);
             let td_icon = tmp.find('td[name="icon"]');
 
             if (fileType != null) {
                 let typeName = fileType.typeName;
-                let icon;
+                let icon, act;
+
                 if (typeName === 'directory') {
                     icon = SEEKER_SETTING.icon.directory;
-                    td_icon.attr('act', SEEKER_SETTING.text.forward);
-                    td_icon.on('click', seeker0_act_click);
+                    act = SEEKER_SETTING.text.forward;
                 } else {
                     icon = SEEKER_SETTING.icon.file;
-                    td_icon.attr('act', SEEKER_SETTING.text.detail);
-                    td_icon.on('click', seeker0_act_click);
+                    act = SEEKER_SETTING.text.detail;
                 }
+                td_icon.attr('act', act);
+                tmp.attr('act', act)
+                tmp.on('click', seeker0_act_click);
                 icon = icon.clone();
                 td_icon.append(icon);
             }
@@ -158,14 +181,15 @@
         let path = null;
         switch (act) {
             case act_text.detail : {
-                let result = seeker0_get_path(target.parent());
+                let result = seeker0_get_path(target);
                 let id = result.id;
                 let url = URLS.detail.findOne.url;
                 location.href = url.concat(id);
+                return false;
                 break;
             }
             case act_text.forward : {
-                let result = seeker0_get_path(target.parent());
+                let result = seeker0_get_path(target);
                 id = result.id;
                 path = result.path;
                 break;
@@ -192,21 +216,63 @@
         }
         return result;
     }
+
+    function seeker0_upload_listen() {
+        let upload = SEEKER_SETTING.btn.upload;
+        upload.removeAttr('hidden');
+        upload.unbind('click');
+
+        if (!isNull(upload)) {
+            upload.on('click', function () {
+                let area = SEEKER_SETTING.area.path;
+                let as = area.find('li a');
+                let target = $(as[as.length - 1])
+                let path = target.attr('path');
+                path = path == null ? '/' : path;
+                let url = URLS.detail.newOne.url;
+                location.href = url.concat('?', 'path=', path);
+            })
+        }
+    }
+
+    function seeker0_listen_tr_click(){
+        let data = SEEKER_SETTING.area.data;
+        let trs = data.find("tr");
+        for (let i = 0; i < trs.length; i++) {
+            let tr = trs[i];
+            tr.onclick = seeker0_act_click;
+        }
+    }
+
+    function isNull(target) {
+        return target == null || target.length == 0;
+    }
 </script>
+<style>
+    #data_part tr{
+        cursor: pointer;
+    }
+</style>
 <body>
 <div th:replace="/main.html::head"></div>
 <div class="container rounded-2 my-3 border-2 border bg-gradient">
-    <div class="row ">
+    <div class="row">
         <span class="justify-content-center py-2 ms-2 mt-3 col fw-bold">
             <nav class="col" style="--bs-breadcrumb-divider: '/';">
                 <ol class="breadcrumb" id="path_area">
                     <li class="breadcrumb-item" name="template" hidden><a href="#"></a></li>
+                    <li class="breadcrumb-item" th:if="${files?:null!=null}"><a th:text="SEARCH"></a></li>
                 </ol>
             </nav>
         </span>
     </div>
 </div>
-<div class="container border border-2 rounded-2">
+<div class="container">
+    <div class="col d-flex justify-content-center ">
+        <a class="btn btn-success w-50" id="upload_file" hidden>上傳檔案</a>
+    </div>
+</div>
+<div class="container border border-2 rounded-2 mt-3">
     <div class="row justify-content-center">
         <div class="text-dark col" style="overflow-x: auto">
             <table class="table table-sm table-striped text-center" style="max-width: content-box">
@@ -221,22 +287,53 @@
             </table>
             <table class="table table-striped table-sm text-center">
                 <tbody id="data_part">
-                <tr id="data_template" hidden>
-                    <td hidden name="id">#</td>
-                    <td hidden name="path">#</td>
-                    <td hidden name="fileType.id">#</td>
-                    <td class="col-1" name="icon" style="cursor: pointer"></td>
-                    <td class="col-3" name="file_name">#</td>
-                    <td class="col-3" name="fileType.typeName">#</td>
-                    <td class="col-3" name="tags">
-                        <span name="template" class=" bg-warning mx-1 px-1 rounded-2" hidden></span>
-                    </td>
-                </tr>
+                <th:block th:if="${files?:null!=null}">
+                    <th:block th:each="file:${files}">
+                        <tr th:act="${file.fileType.typeName=='directory'?'forward':'detail'}">
+                            <td hidden name="id" th:value="${file.id}">#</td>
+                            <td hidden name="path" th:value="${file.path}">#</td>
+                            <td hidden name="fileType.id" th:value="${file.fileType.id}">#</td>
+                            <td class="col-1" name="icon" style="cursor: pointer">
+                                <svg th:if="${file.fileType.typeName=='directory'}"
+                                     xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-folder-fill" viewBox="0 0 16 16">
+                                    <path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"/>
+                                </svg>
+                                <svg th:if="!${file.fileType.typeName=='directory'}"
+                                     xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
+                                    <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1h-4z"/>
+                                </svg>
+                            </td>
+                            <td class="col-3" name="file_name" th:text="${file.file_name}">#</td>
+                            <td class="col-3" name="fileType.typeName" th:text="${file.fileType.typeName}">#</td>
+                            <td class="col-3" name="tags">
+                                <th:block th:each="tag:${file.tags}">
+                                    <span name="template" class=" bg-warning mx-1 px-1 rounded-2" th:value="${tag.id}"
+                                          th:text="${tag.name}"></span>
+                                </th:block>
+                            </td>
+                        </tr>
+                    </th:block>
+                </th:block>
                 </tbody>
             </table>
         </div>
     </div>
     <div hidden>
+        <table>
+            <tr id="data_template" hidden>
+                <td hidden name="id">#</td>
+                <td hidden name="path">#</td>
+                <td hidden name="fileType.id">#</td>
+                <td class="col-1" name="icon" style="cursor: pointer"></td>
+                <td class="col-3" name="file_name">#</td>
+                <td class="col-3" name="fileType.typeName">#</td>
+                <td class="col-3" name="tags">
+                    <span name="template" class=" bg-warning mx-1 px-1 rounded-2" hidden></span>
+                </td>
+            </tr>
+        </table>
         <svg id='icon_directory' xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
              class="bi bi-folder-fill" viewBox="0 0 16 16">
             <path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"/>
@@ -246,6 +343,7 @@
             <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1h-4z"/>
         </svg>
     </div>
+    <span id="stat" th:if="${files?:null!=null}" th:data-move="${move?:null}"></span>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"

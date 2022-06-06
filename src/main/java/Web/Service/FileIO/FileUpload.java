@@ -75,14 +75,14 @@ public class FileUpload {
         Assert.notNull(filePath.getParentPath(), "ParentPath is null\ncan't not update");
         Assert.hasText(new_file_name, "File name can't not be empty");
 
+        String origin_file_name = "";
+        FileType fileType = filePath.getFileType();
         DeleteFileTask deleteFileTask = null;
         FilePath newFilePath = null;
-        FilePath old_filePath
-                = fileService.getFile(filePath.getId());
-        String old_path
-                = old_filePath.getPath();
-        File old_file
-                = fileDownloader.getFile(old_filePath.getId());
+        FilePath old_filePath = fileService.getFile(filePath.getId());
+        String old_path = old_filePath.getPath();
+        File old_file = fileDownloader.getFile(old_filePath.getId());
+
 
         if (!Objects.equals(old_filePath.getVersion(), filePath.getVersion())) {
             throw new FileVersionNotMatchException("File Version Not Match", old_filePath, filePath);
@@ -102,12 +102,14 @@ public class FileUpload {
                         = new DeleteFileTask(fileDownloader, old_file);
             }
 
+            origin_file_name =
+                    new_file_name.concat(".").concat(fileType.getTypeName());
             newFilePath
-                    = saveFilePath(makeFilePath(filePath, new_file_name));
+                    = saveFilePath(makeFilePath(filePath, origin_file_name));
 
             if (fileMove) {
                 String full_file_name
-                        = getLastFileNameFromPath(Paths.get(old_path)).replace(old_file_name,new_file_name);
+                        = getLastFileNameFromPath(Paths.get(old_path)).replace(old_file_name, new_file_name);
                 MockMultipartFile multiPartFile
                         = new MockMultipartFile(full_file_name, new FileInputStream(old_file));
                 saveFileToLocal(multiPartFile, newFilePath.getPath());
@@ -145,7 +147,7 @@ public class FileUpload {
         }
     }
 
-    private FilePath saveFilePath(FilePath filePath){
+    private FilePath saveFilePath(FilePath filePath) {
         filePath.setVersion(UUID.randomUUID());
         filePath = fileRep.save(filePath);
         return filePath;
@@ -180,12 +182,18 @@ public class FileUpload {
                 = opt_parent.get();
         String parentPath0
                 = parentPath.getPath();
-        if(Paths.get(parentPath0).getNameCount() == 0){
+        if (Paths.get(parentPath0).getNameCount() == 0) {
             parentPath0 = "";
         }
-        String localPath
-                = Paths.get(parentPath0,
-                save_file_name.concat(".").concat(type.getTypeName())).toString();
+        String localPath;
+
+        if (type.getTypeName().equals("file") || save_file_name.startsWith(".")) {
+            localPath = Paths.get(parentPath0, save_file_name).toString();
+        } else {
+            localPath = Paths.get(parentPath0,
+                    save_file_name.concat(".").concat(type.getTypeName())).toString();
+
+        }
 
         filePath.setFileType(type);
         filePath.setParentPath(parentPath);
@@ -198,7 +206,7 @@ public class FileUpload {
 
     private FilePath saveFile(FilePath filePath, MultipartFile file)
             throws Exception {
-        filePath = saveFilePath(makeFilePath(filePath, file.getOriginalFilename()));
+        filePath = saveFilePath(makeFilePath(filePath, file.getOriginalFilename().replaceAll("[\\\\/:*?\"<>|]","_")));
         String path = filePath.getPath();
         saveFileToLocal(file, path);
         return filePath;
@@ -218,12 +226,12 @@ public class FileUpload {
         }
     }
 
-    public static String getLastFileNameFromPath(Path path){
+    public static String getLastFileNameFromPath(Path path) {
         int length = path.getNameCount();
-        if(length!=0) {
+        if (length != 0) {
             Path name = path.getName(length - 1);
             return name.toString();
-        }else{
+        } else {
             throw new IllegalArgumentException("file name can't be empty");
         }
     }
@@ -270,7 +278,7 @@ public class FileUpload {
         public void flush() {
             if (Objects.nonNull(this.file)) {
                 log.info(String.format("Delete File [%s]", this.file.getPath()));
-                if(file.exists()){
+                if (file.exists()) {
                     file.delete();
                 }
             }

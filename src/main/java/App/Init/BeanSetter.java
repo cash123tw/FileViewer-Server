@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.Order;
 import org.springframework.objenesis.strategy.PlatformDescription;
 import org.springframework.orm.jpa.vendor.Database;
 
@@ -25,6 +26,8 @@ public class BeanSetter {
     private String fileRoot;
     @Value("${setter.hidePath}")
     private boolean hidePath;
+    @Value("${root.convert-file-tmp}")
+    private String tmp_path;
 
     /**
      * Value type :
@@ -55,6 +58,12 @@ public class BeanSetter {
     @Bean
     public Init getInit() {
         return new Init((boolean) getStartMode().get("rescan"));
+    }
+
+    @Bean
+    @Order(1)
+    public WordToPdf getWrodToPdf(){
+        return new WordToPdf(tmp_path);
     }
 
     @Bean

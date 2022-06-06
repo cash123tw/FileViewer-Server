@@ -123,11 +123,6 @@ public class FilePath {
         return tags;
     }
 
-//    public Set<Tag> getTags(boolean io) {
-//        if (!io) return null;
-//        else return tags;
-//    }
-
     public void addTag(Tag tag) {
         getTags().add(tag);
     }

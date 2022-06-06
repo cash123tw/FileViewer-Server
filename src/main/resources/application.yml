@@ -3,6 +3,7 @@ server:
 
 root:
   path: C:\Users\BabyPig\IdeaProjects
+  convert-file-tmp: C:\Users\BabyPig\IdeaProjects\.tmp
 
 tagName:
   dir: Directory
@@ -13,8 +14,15 @@ setter:
   hidePath: true
 
 spring:
+  servlet:
+    multipart:
+      #50mb
+      max-request-size: 52428800
+      max-file-size: 52428800
+
   main:
     allow-circular-references: true
+
   mvc:
     view:
       prefix: /page
@@ -31,7 +39,7 @@ spring:
 #    hibernate:
 #      ddl-auto: create
     properties:
-      hibernate.format_sql: true
+      hibernate.format_sql: false
       hibernate.metadata_builder_contributor: App.Init.Init
     open-in-view: false
 

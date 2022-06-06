@@ -10,7 +10,7 @@ public interface Serv_Tag_Provider {
 
     List<Tag> findAllTag(String name);
 
-    List<Tag> findByTagType(Integer id);
+    List<Tag> findByTagTypeAndTagName(Integer id, String tagName);
 
     Tag saveTag(Tag tag);
 

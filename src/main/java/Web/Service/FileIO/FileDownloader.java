@@ -28,8 +28,8 @@ public class FileDownloader {
     public File getFile(Integer id) throws FileNotFoundException, IllegalAccessException {
         FilePath file
                 = fileService.getFile(id);
-            File result
-                    = pathProvider.getFile(file.getPath());
+        File result
+                = pathProvider.getFile(file.getPath());
         return result;
     }
 

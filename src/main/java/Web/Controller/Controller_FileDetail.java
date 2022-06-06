@@ -1,13 +1,12 @@
 package Web.Controller;
 
 import Data.Entity.FilePath;
+import Data.Entity.FileType;
 import Web.Service.FileGet.Serv_GetFile_FromDatabase_Impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.FileNotFoundException;
@@ -26,6 +25,22 @@ public class Controller_FileDetail {
         this.explore = explore;
     }
 
+    @GetMapping("/")
+    public ModelAndView getNewDetailPage(@RequestParam("path") String path,
+                                         @ModelAttribute FilePath filePath,
+                                         ModelAndView mav){
+        if(path.equals("")){
+            path = "/";
+        }
+        FilePath file = fileService.getFileByFilePath(path);
+        filePath.setParentPath(file);
+        filePath.setFileType(new FileType());
+        mav.setViewName("/detail");
+        mav.addObject("data", filePath);
+
+        return mav;
+    }
+
     @GetMapping("/{id}")
     public ModelAndView getDetail(@PathVariable("id") Integer id, ModelAndView mav) throws FileNotFoundException {
         FilePath file
@@ -37,7 +52,7 @@ public class Controller_FileDetail {
         }
 
         mav.setViewName("/detail");
-        mav.addObject("data",file);
+        mav.addObject("data", file);
 
         return mav;
     }

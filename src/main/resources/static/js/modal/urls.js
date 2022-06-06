@@ -1,12 +1,12 @@
-const URLS = {
+export const urls = {
     'explore': {
         listFile: {method: 'get', url: '/explore'},
         search: {method: 'get', url: '/explore/search'},
         back: {method: 'get', url: 'explore/back'}
     },
     detail: {
-        newOne: {method: 'get', url: '/explore/detail/'},
         findOne: {method: 'get', url: '/explore/detail/'},
+        newOne: {method: 'get', url: '/explore/detail/'}
     },
     'tag': {
         find: '/tag/find',
@@ -30,5 +30,8 @@ const URLS = {
         new: {method: 'post', url: '/file'},
         update: {method: 'put', url: '/file'},
         delete: {method: 'delete', url: '/file'},
+    },
+    download: {
+        get: {method:'get',url:'/io'}
     }
 }

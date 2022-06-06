@@ -4,6 +4,7 @@ import Data.Entity.Tag;
 import Data.Entity.TagType;
 import Data.Repository.TagRepository;
 import Web.Service.TypeEditor.Serv_Tag_Type_Impl;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -30,12 +31,21 @@ public class Serv_Tag_Provider_Impl implements Serv_Tag_Provider {
     }
 
     @Override
-    public List<Tag> findByTagType(Integer id) {
-        if(Objects.isNull(id)){
-            throw new IllegalArgumentException("Id is null");
+    public List<Tag> findByTagTypeAndTagName(Integer tagTypeId, String tagName) {
+        List<Tag> result;
+
+        if (Objects.isNull(tagName) || Strings.isEmpty(tagName)) {
+            tagName = "%%";
+        } else {
+            tagName = "%".concat(tagName).concat("%");
         }
-        List<Tag> result
-                = tagRepository.findAllByTagType_Id(id);
+
+
+        if (Objects.equals(tagTypeId, -1) || Objects.equals(tagTypeId, null)) {
+            result = tagRepository.findAllByNameLike(tagName);
+        } else {
+            result = tagRepository.findAllByNameLikeAndTagTypeId(tagTypeId, tagName);
+        }
         return result;
     }
 
@@ -47,7 +57,7 @@ public class Serv_Tag_Provider_Impl implements Serv_Tag_Provider {
     }
 
     @Override
-    public Tag findOrCreate(Tag tag) throws Exception {
+    public Tag findOrCreate(Tag tag) {
         Tag target = null;
 
         if (Objects.isNull(tag)) {
@@ -68,33 +78,35 @@ public class Serv_Tag_Provider_Impl implements Serv_Tag_Provider {
                 = tag.getTagType();
         String tagName
                 = tag.getName();
-        String tagTypeName
+        String typeName
                 = "";
         if ("".equals(tagName) || Objects.isNull(tagName)) {
             throw new IllegalArgumentException("TagName is Empty");
         }
 
-        if (Objects.nonNull(tagType)) {
+        if (Objects.nonNull(tagType) && Objects.nonNull(tagType.getId())) {
             Integer type_id
                     = tagType.getId();
-            tagTypeName
+            typeName
                     = tagType.getTypeName();
-            if(Objects.nonNull(type_id)){
+            if (Objects.nonNull(type_id)) {
                 Optional<TagType> opt_type
                         = tagTypeService.findTagTypeById(type_id);
                 if (opt_type.isEmpty()) {
                     throw new EntityExistsException("TagType is not present");
-                }else{
+                } else {
                     tagType = opt_type.get();
                 }
-            }else {
+            } else {
                 tagType
-                        = tagTypeService.findTagOrCreateOne(tagTypeName);
+                        = tagTypeService.findTagOrCreateOne(typeName);
             }
+        }else{
+            tagType = null;
         }
 
         target
-                = tagRepository.findTagByTagTypeAndName(tagName, tagType.getTypeName());
+                = tagRepository.findTagByTagTypeAndName(tagName, typeName);
 
         if (target == null) {
             tag.setTagType(tagType);
@@ -180,35 +192,35 @@ public class Serv_Tag_Provider_Impl implements Serv_Tag_Provider {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Set<Tag> saveTagsIfNotPresent(Set<Tag> tags){
+    public Set<Tag> saveTagsIfNotPresent(Set<Tag> tags) {
         ArrayList<Integer> ids
                 = new ArrayList<>();
-        Map<String,Tag> names
+        Map<String, Tag> names
                 = new HashMap<>();
 
-        tags.forEach(t->{
+        tags.forEach(t -> {
             Integer id = t.getId();
             String name = t.getName();
 
-            if(Objects.nonNull(id)){
+            if (Objects.nonNull(id)) {
                 ids.add(id);
-            }else if (Objects.nonNull(name)){
-                names.put(name,t);
-            }else{
+            } else if (Objects.nonNull(name)) {
+                names.put(name, t);
+            } else {
                 throw new IllegalArgumentException("Id And name both is null !!");
             }
         });
 
         Set<Tag> compareResult
                 = tagRepository.findTagsInIdOrName(ids, names.keySet().stream().toList());
-        compareResult.forEach(tag->{
+        compareResult.forEach(tag -> {
             String name = tag.getName();
-            if(names.containsKey(name)){
+            if (names.containsKey(name)) {
                 names.remove(name);
             }
         });
 
-        names.forEach((key,value)->{
+        names.forEach((key, value) -> {
             Tag tag = saveTag(value);
             compareResult.add(tag);
         });

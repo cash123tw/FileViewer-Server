@@ -1,19 +1,18 @@
-package Web.Controller.FileUpdate;
+package Web.Controller.FileController;
 
 import Data.Entity.FilePath;
 import Data.Entity.Tag;
+import Web.Service.FileGet.Serv_GetFile_FromDatabase_Impl;
 import Web.Service.FileIO.FileUpload;
-import Web.Service.TagService.Serv_Tag_Provider_Impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
@@ -24,23 +23,28 @@ import java.util.stream.Collectors;
 @RequestMapping("/file")
 public class FileUpdater {
 
-    private Serv_Tag_Provider_Impl tagService;
     private FileUpload fileUploadService;
+    private Serv_GetFile_FromDatabase_Impl fileService;
 
     @Autowired
-    public FileUpdater(Serv_Tag_Provider_Impl tagService, FileUpload fileUploadService) {
-        this.tagService = tagService;
+    public FileUpdater(FileUpload fileUploadService, Serv_GetFile_FromDatabase_Impl fileService) {
         this.fileUploadService = fileUploadService;
+        this.fileService = fileService;
     }
 
     @ModelAttribute("target")
     public FilePath parseToFilePath(FilePath filePath,
-                                    @RequestParam(value = "tag.id", required = false, defaultValue = "") List<Integer> tag_ids,
-                                    @RequestParam(value = "new_tag.name", required = false, defaultValue = "") List<String> new_tag) {
+                                    @RequestParam(value = "tags.name", required = false, defaultValue = "") List<String> new_tag,
+                                    @RequestParam(value = "tags.name[]", required = false, defaultValue = "") List<String> new_tags,
+                                    HttpServletRequest req) {
         if (Objects.isNull(filePath.getParentPath())) {
-            throw new IllegalArgumentException("FileName or ParentPath not exists");
+            throw new IllegalArgumentException("ParentPath not exists");
         }
-        Set<Tag> tags = tag_ids
+        String file_name = filePath.getFile_name();
+        if (Objects.isNull(file_name) || file_name.matches("[\\S]*[\\\\/:*?\"<>|.][\\S]*")) {
+            throw new IllegalArgumentException("FileName empty or contains \\\\/:*?\"<>|. ");
+        }
+        Set<Tag> tags = new_tags
                 .stream()
                 .map(Tag::new)
                 .collect(Collectors.toSet());
@@ -64,6 +68,7 @@ public class FileUpdater {
         FilePath parent
                 = result.getParentPath();
         if (Objects.nonNull(parent)) {
+            parent.setTags(null);
             parent.setParentPath(null);
         }
         return result;
