@@ -1,6 +1,7 @@
 package Web.Service.LocalFileWalker;
 
 import Bean.FileDetail;
+import Data.Entity.FilePath;
 import Data.Repository.FilePathRepository;
 import Data.Repository.FileTypeRepository;
 import Data.Repository.TagRepository;
@@ -8,16 +9,21 @@ import Web.Service.FileDataEditor.Serv_DataEditor_Impl;
 import Worker.FileExploreWorker;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.function.Predicate;
 
 @Service
 @Log
-public class Serv_localWalk_impl implements Serv_localServWalk{
+public class Serv_localWalk_impl implements Serv_localServWalk {
 
     private FileTypeRepository fileTypeRep;
     private TagRepository tagRep;
@@ -41,8 +47,8 @@ public class Serv_localWalk_impl implements Serv_localServWalk{
     @Override
     public boolean walkLocalFile(Predicate<File> predicate) {
         try {
-            worker.SearchFile("",predicate);
-        } catch (IllegalAccessException|IOException e) {
+            worker.SearchFile("", predicate);
+        } catch (IllegalAccessException | IOException e) {
             log.warning(e.getMessage());
             return false;
         }
@@ -50,14 +56,50 @@ public class Serv_localWalk_impl implements Serv_localServWalk{
         return true;
     }
 
-    public boolean walkLocalFileAndSaveToRepository(){
+    /**
+     * Checking all FilePath relate File is exists,
+     * if not,will set FilePath.exists =  false
+     */
+    public void checkAllFilePathExists() {
+        int DATA_SIZE_PER_REQUEST = 200;
+        int page = 0;
+        Page<FilePath> paths = null;
+
+        do {
+            paths = filePathRep.findAll(PageRequest.of(page++, DATA_SIZE_PER_REQUEST));
+            paths
+                    .get()
+                    .forEach(file -> {
+                        try {
+//                            If file not exists , will throw Exception
+                            worker.getFile(file.getPath());
+                            if(file.getMissing()){
+                                file.setMissing(false);
+                                filePathRep.save(file);
+                            }
+                        } catch (FileNotFoundException | IllegalAccessException e) {
+                            if (e instanceof FileNotFoundException) {
+//                                file.setMissing(true);
+                                filePathRep.delete(file);
+                                log.warning(String.format("File is missing auto remove ID:[%d] PATH:[%s]", file.getId(), file.getPath()));
+                            } else {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+        } while (paths.getNumber()+1 < paths.getTotalPages());
+    }
+
+    public boolean walkLocalFileAndSaveToRepository() {
         return walkLocalFile(new Predicate<File>() {
+
             @Override
             public boolean test(File file) {
-                if(!file.getName().startsWith(".")) {
+                if (!file.getName().startsWith(".")) {
                     FileDetail fileDetail
                             = worker.getPathProvider().makeFileDetail(file);
                     dataEditor.saveDataToDataBase(fileDetail);
+                    return true;
                 }
                 return false;
             }

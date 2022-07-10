@@ -5,14 +5,16 @@ import Data.Entity.FileType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface FilePathRepository extends CrudRepository<FilePath, Integer> {
+public interface FilePathRepository extends CrudRepository<FilePath, Integer>, PagingAndSortingRepository<FilePath,Integer> {
 
     @Query("select f from FilePath f where f.path = :path")
     FilePath findFilePathByPath(Path path);
@@ -20,7 +22,7 @@ public interface FilePathRepository extends CrudRepository<FilePath, Integer> {
     @Query("select f from FilePath f join f.fileType t on t.typeName = :typeName where f.path = :path")
     FilePath findFilePathByPathAndFileTypeName(Path path, String typeName);
 
-    @Query("select f,t from FilePath f join f.fileType t where f.id in :ids")
+    @Query("select f from FilePath f join f.fileType t where f.id in :ids")
     @EntityGraph(value = "FilePath.findAll"
             , type = EntityGraph.EntityGraphType.FETCH)
     List<FilePath> findFilePathsByIdIsInIds(List ids);

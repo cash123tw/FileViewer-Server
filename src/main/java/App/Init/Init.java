@@ -12,25 +12,30 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.SpringTransactionAnnotationParser;
 
 @NoArgsConstructor
 @Order(2)
 public class Init implements ApplicationListener<ContextRefreshedEvent>, MetadataBuilderContributor {
 
-    boolean reScan;
+    private StartMode startMode;
 
-    public Init(boolean reScan) {
-        this.reScan = reScan;
+    public Init(StartMode startMode) {
+        this.startMode = startMode;
     }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (reScan) {
+        if (startMode.equals(StartMode.NEW) || startMode.equals(StartMode.RESCAN)) {
             Serv_localWalk_impl bean
                     = event
                     .getApplicationContext()
                     .getBean(Serv_localWalk_impl.class);
             bean.walkLocalFileAndSaveToRepository();
+
+            if (startMode.equals(StartMode.RESCAN)) {
+                bean.checkAllFilePathExists();
+            }
         }
     }
 
@@ -41,5 +46,9 @@ public class Init implements ApplicationListener<ContextRefreshedEvent>, Metadat
                         "group_concat",
                         new StandardSQLFunction("group_concat", StandardBasicTypes.STRING)
                 );
+    }
+
+    public enum StartMode {
+        RESCAN, NEW, NON
     }
 }

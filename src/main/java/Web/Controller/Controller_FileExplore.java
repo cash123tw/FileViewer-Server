@@ -2,11 +2,18 @@ package Web.Controller;
 
 import Bean.FileDetail;
 import Data.Entity.FilePath;
+import Data.Entity.FileType;
+import Data.Entity.Tag;
 import Web.Bean.FileDetailResult;
 import Web.Bean.RequestResult;
 import Web.Service.FileGet.Serv_GetFile_FromDataBase;
 import Web.Service.FileGet.Serv_GetFile_FromDatabase_Impl;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import lombok.extern.java.Log;
+import net.bytebuddy.implementation.bind.annotation.This;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -14,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/explore")
@@ -25,18 +33,18 @@ public class Controller_FileExplore {
 
     @GetMapping({"/"})
     public ModelAndView requestWebPage(ModelAndView mav) {
-        mav.setViewName("/seeker");
+        mav.setViewName("/seeker2");
         return mav;
     }
 
-    @GetMapping({"/test"})
-    public ModelAndView requestSearchPage(ModelAndView mav) {
-        List<FilePath> files = fileService.listFile("/");
-        mav.addObject("files",files);
-        mav.addObject("move","search");
-        mav.setViewName("/seeker");
-        return mav;
-    }
+//    @GetMapping({"/search"})
+//    public ModelAndView requestSearchPage(ModelAndView mav) {
+//        List<FilePath> files = fileService.listFile("/");
+//        mav.addObject("files", files);
+//        mav.addObject("move", "search");
+//        mav.setViewName("/seeker2");
+//        return mav;
+//    }
 
     /**
      * Get file list by root id.
@@ -61,13 +69,15 @@ public class Controller_FileExplore {
     /**
      * Search in path by file name.
      */
-    @GetMapping("/search")
-    public List<FilePath> searchFile(String path, String fileName) {
-        List<FilePath> result
-                = fileService.searchFile(path, fileName);
-        result.stream()
+    @PostMapping("/findByParam")
+    @CrossOrigin()
+    public List<FilePath> searchFile(@RequestBody SearchParam searchParam) {
+        List<FilePath> filePaths
+                = fileService.searchFilePath(searchParam);
+        filePaths.stream()
                 .forEach(this::ensureParentPathNotLoopGet);
-        return result;
+
+        return filePaths;
     }
 
     @GetMapping("/back")
@@ -88,4 +98,34 @@ public class Controller_FileExplore {
         return filePath;
     }
 
+    @Data
+    public static class SearchParam {
+        private Integer pathId;
+        private String pathName;
+        private Integer fileTypeId;
+        private String fileName;
+        private Set<Tag> tags;
+        private Integer page;
+
+        public FileType getFileType() {
+            return nonNull(fileTypeId) ? new FileType() {{
+                setId(fileTypeId);
+            }} : null;
+        }
+
+        public String getFileName() {
+            return Strings.isEmpty(fileName) ? "" : fileName;
+        }
+
+        public boolean isEmpty() {
+            return
+                            Objects.isNull(fileTypeId) &&
+                            Strings.isEmpty(fileName) &&
+                            (Objects.isNull(tags) || Objects.equals(tags.size(), 0));
+        }
+
+        private boolean nonNull(Object obj) {
+            return Objects.nonNull(obj);
+        }
+    }
 }

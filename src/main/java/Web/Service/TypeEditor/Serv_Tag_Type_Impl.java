@@ -63,4 +63,12 @@ public class Serv_Tag_Type_Impl implements Serv_Tag_Type {
 
         return tag;
     }
+
+    public boolean checkTagTypeNotEmpty(TagType tagType){
+        return
+                Objects.nonNull(tagType) &&
+                (Objects.nonNull(tagType.getId()) ||
+                Objects.nonNull(tagType.getTypeName()) ||
+                Objects.nonNull(tagType.getComment())) ;
+    }
 }

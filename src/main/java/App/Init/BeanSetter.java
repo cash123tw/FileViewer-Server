@@ -3,21 +3,17 @@ package App.Init;
 import Bean.PathProvider;
 import Worker.FileExploreWorker;
 import Worker.FileSaverWorker;
-import org.apache.tomcat.util.net.AprEndpoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
-import org.springframework.objenesis.strategy.PlatformDescription;
-import org.springframework.orm.jpa.vendor.Database;
 
-import javax.sql.DataSource;
 import java.io.FileNotFoundException;
-import java.io.ObjectStreamClass;
 import java.util.*;
+
+import static App.Init.Init.*;
 
 @Configuration
 public class BeanSetter {
@@ -26,8 +22,10 @@ public class BeanSetter {
     private String fileRoot;
     @Value("${setter.hidePath}")
     private boolean hidePath;
-    @Value("${root.convert-file-tmp}")
-    private String tmp_path;
+    @Value("${root.word2pdf.static-location}")
+    private String w2p_location;
+    @Value("${root.word2pdf.suffix}")
+    private String w2p_suffix;
 
     /**
      * Value type :
@@ -57,13 +55,13 @@ public class BeanSetter {
 
     @Bean
     public Init getInit() {
-        return new Init((boolean) getStartMode().get("rescan"));
+        return new Init((StartMode) getStartMode().get("rescan"));
     }
 
     @Bean
     @Order(1)
     public WordToPdf getWrodToPdf(){
-        return new WordToPdf(tmp_path);
+        return new WordToPdf(w2p_location,w2p_suffix);
     }
 
     @Bean
@@ -75,20 +73,20 @@ public class BeanSetter {
 
     public Map<String, Object> getStartMode() {
         HashMap<String, Object> result = new HashMap<>();
-        boolean mode = false;
+        StartMode mode = StartMode.NON;
         String ddl_auto = "update";
 
         switch (start_mode.toLowerCase()) {
             case "rescan" -> {
-                mode= true;
+                mode = StartMode.RESCAN;
                 ddl_auto = "update";
             }
             case "new" -> {
-                mode= true;
+                mode = StartMode.NEW;
                 ddl_auto = "create";
             }
             default -> {
-                mode= false;
+                mode = StartMode.NON;
                 ddl_auto = "update";
             }
         }

@@ -35,8 +35,7 @@ public class FileUpdater {
     @ModelAttribute("target")
     public FilePath parseToFilePath(FilePath filePath,
                                     @RequestParam(value = "tags.name", required = false, defaultValue = "") List<String> new_tag,
-                                    @RequestParam(value = "tags.name[]", required = false, defaultValue = "") List<String> new_tags,
-                                    HttpServletRequest req) {
+                                    @RequestParam(value = "tags.name[]", required = false, defaultValue = "") List<String> new_tags) {
         if (Objects.isNull(filePath.getParentPath())) {
             throw new IllegalArgumentException("ParentPath not exists");
         }

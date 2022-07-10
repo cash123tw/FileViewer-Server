@@ -9,7 +9,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 
-@SpringBootApplication(scanBasePackages = {"Web.*","App.*"})
+@SpringBootApplication(scanBasePackages = {"Web.*","App.*","Data.Criteria"})
 @EntityScan(basePackages = {"Data.Entity"})
 @EnableJpaRepositories(basePackages = {"Data.Repository"})
 public class AppStarter {
@@ -18,10 +18,10 @@ public class AppStarter {
         Desktop desktop = Desktop.getDesktop();
         SpringApplication.run(AppStarter.class);
 
-        if(desktop.isSupported(Desktop.Action.BROWSE)){
-            URI uri = URI.create("http://localhost:9090/");
-            desktop.browse(uri);
-        }
+//        if(desktop.isSupported(Desktop.Action.BROWSE)){
+//            URI uri = URI.create("http://localhost:9090/");
+//            desktop.browse(uri);
+//        }
     }
 
 }

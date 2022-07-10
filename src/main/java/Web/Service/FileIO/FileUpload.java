@@ -41,6 +41,7 @@ public class FileUpload {
     private Serv_Type_Impl typeService;
     private Serv_GetFile_FromDatabase_Impl fileService;
     private Serv_Tag_Provider_Impl tagService;
+    private Serv_DataEditor_Impl dataService;
     private FileDownloader fileDownloader;
 
     private FilePathRepository fileRep;
@@ -48,10 +49,11 @@ public class FileUpload {
     private FileExploreWorker finderWorker;
 
     @Autowired
-    public FileUpload(Serv_Type_Impl typeService, Serv_GetFile_FromDatabase_Impl fileService, Serv_Tag_Provider_Impl tagService, FileDownloader fileDownloader, FilePathRepository fileRep, FileSaverWorker saverWorker, FileExploreWorker finderWorker) {
+    public FileUpload(Serv_Type_Impl typeService, Serv_GetFile_FromDatabase_Impl fileService, Serv_Tag_Provider_Impl tagService, Serv_DataEditor_Impl dataService, FileDownloader fileDownloader, FilePathRepository fileRep, FileSaverWorker saverWorker, FileExploreWorker finderWorker) {
         this.typeService = typeService;
         this.fileService = fileService;
         this.tagService = tagService;
+        this.dataService = dataService;
         this.fileDownloader = fileDownloader;
         this.fileRep = fileRep;
         this.saverWorker = saverWorker;
@@ -69,6 +71,7 @@ public class FileUpload {
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public FilePath UpdateFilePath(FilePath filePath) throws Exception {
+        Boolean success = false;
         String new_file_name = filePath.getFile_name();
 
         Assert.notNull(filePath.getId(), "FilePath Id is null\ncan't not update");
@@ -104,8 +107,8 @@ public class FileUpload {
 
             origin_file_name =
                     new_file_name.concat(".").concat(fileType.getTypeName());
-            newFilePath
-                    = saveFilePath(makeFilePath(filePath, origin_file_name));
+            newFilePath =
+                    makeFilePath(filePath, origin_file_name);
 
             if (fileMove) {
                 String full_file_name
@@ -114,8 +117,11 @@ public class FileUpload {
                         = new MockMultipartFile(full_file_name, new FileInputStream(old_file));
                 saveFileToLocal(multiPartFile, newFilePath.getPath());
             }
+
+            newFilePath = saveFilePath(newFilePath);
+            success = true;
         } finally {
-            if (Objects.nonNull(deleteFileTask)) {
+            if (Objects.nonNull(deleteFileTask) && success) {
                 deleteFileTask.flush();
             }
         }
@@ -147,9 +153,9 @@ public class FileUpload {
         }
     }
 
-    private FilePath saveFilePath(FilePath filePath) {
+    private FilePath saveFilePath(FilePath filePath) throws FileNotFoundException, IllegalAccessException {
         filePath.setVersion(UUID.randomUUID());
-        filePath = fileRep.save(filePath);
+        filePath = dataService.saveDataToDataBase(filePath);
         return filePath;
     }
 
@@ -206,9 +212,11 @@ public class FileUpload {
 
     private FilePath saveFile(FilePath filePath, MultipartFile file)
             throws Exception {
-        filePath = saveFilePath(makeFilePath(filePath, file.getOriginalFilename().replaceAll("[\\\\/:*?\"<>|]","_")));
-        String path = filePath.getPath();
+        FilePath tmp = makeFilePath(filePath, file.getOriginalFilename().replaceAll("[\\\\/:*?\"<>|]", "_"));
+        String path = tmp.getPath();
         saveFileToLocal(file, path);
+
+        filePath = saveFilePath(tmp);
         return filePath;
     }
 

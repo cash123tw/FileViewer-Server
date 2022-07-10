@@ -129,6 +129,10 @@ public class Serv_Tag_Provider_Impl implements Serv_Tag_Provider {
         Integer id = tag.getId();
         boolean success = false;
 
+        if(!tagTypeService.checkTagTypeNotEmpty(tag.getTagType())){
+            tag.setTagType(null);
+        }
+
         if (Objects.nonNull(id)) {
             Optional<Tag> find = findById(id);
             if (find.isPresent()) {

@@ -17,9 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -60,15 +63,40 @@ public class Serv_DataEditor_Impl implements Serv_DataEditor {
     }
 
     @Override
-    public boolean saveDataToDataBase(FilePath filePath) {
-        try {
-            filePathRep.save(filePath);
-        } catch (Exception e) {
-            log.warning(e.getMessage());
-            return false;
+    public FilePath saveDataToDataBase(FilePath filePath) throws FileNotFoundException, IllegalAccessException {
+        if (pathProvider.isHideRealPath()) {
+            String path = Paths.get(filePath.getPath()).toString();
+//            path = path.replace(Paths.get(pathProvider.getRootPath()).toString(), "");
+            path = pathProvider.hideRealPath(path);
+
+            if (!path.startsWith("\\")) {
+                path = "\\" + path;
+            }
+
+            filePath.setPath(path);
         }
 
-        return true;
+
+        File file = pathProvider.getFile(filePath.getPath());
+
+        filePath.setLastModify(new Date(file.lastModified()));
+        filePath = findParentPath(null, filePath);
+        filePath.setFile_name(removeTypeFromPath(filePath.getFile_name()));
+
+        FilePath result;
+
+        if (Objects.isNull(filePath.getId())) {
+            result = filePathRep.findFilePathByPath(Paths.get(filePath.getPath()));
+        }else{
+            result = filePath;
+        }
+
+        if (Objects.nonNull(result) && Objects.nonNull(result.getId())) {
+            filePath.setId(result.getId());
+        }
+
+        result = filePathRep.save(filePath);
+        return result;
     }
 
     @Override
@@ -101,8 +129,7 @@ public class Serv_DataEditor_Impl implements Serv_DataEditor {
                         .forEachRemaining(filePath::addTag);
             }
 
-            findParentPath(fileDetail, filePath);
-            filePathRep.save(filePath);
+            saveDataToDataBase(filePath);
         } catch (Exception e) {
             e.printStackTrace();
             log.warning(e.getMessage());
@@ -250,6 +277,5 @@ public class Serv_DataEditor_Impl implements Serv_DataEditor {
     public static Path transferPath(String path) {
         return Path.of(path);
     }
-
 
 }

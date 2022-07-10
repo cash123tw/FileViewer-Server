@@ -1,12 +1,16 @@
 package Web.Service.FileGet;
 
+import Bean.PathProvider;
+import Data.Criteria.MineCriteria;
 import Data.Entity.FilePath;
 import Data.Entity.FileType;
 import Data.Repository.FilePathRepository;
 import Web.Bean.FileDetailResult;
 import Web.Bean.RequestResult;
+import Web.Controller.Controller_FileExplore;
 import Web.Service.TypeEditor.Serv_Type_Impl;
 import com.sun.istack.NotNull;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -20,11 +24,23 @@ import java.util.stream.Collectors;
 @Service
 public class Serv_GetFile_FromDatabase_Impl implements Serv_GetFile_FromDataBase {
 
-    @Autowired
+    private Integer DATA_LENGTH = 100;
+
     private FilePathRepository filePathRepository;
-    @Autowired
     private Serv_Type_Impl typeService;
+    private MineCriteria criteria;
+    private PathProvider pathProvider;
+
     private FileType dir_type;
+
+    @Autowired
+    public Serv_GetFile_FromDatabase_Impl(PathProvider pathProvider,FilePathRepository filePathRepository, Serv_Type_Impl typeService, MineCriteria criteria) {
+        this.filePathRepository = filePathRepository;
+        this.typeService = typeService;
+        this.criteria = criteria;
+        this.pathProvider = pathProvider;
+    }
+
 
     @Override
     public List<FilePath> listFile(@NotNull Integer root_id) {
@@ -72,6 +88,45 @@ public class Serv_GetFile_FromDatabase_Impl implements Serv_GetFile_FromDataBase
         return lists;
     }
 
+    public List<FilePath> getPathDirectory(String path) {
+        List<FilePath> result;
+        if (path == null || path.equals("/") || path.equals("")) {
+            result = listFile("/");
+        } else {
+            FilePath filePath
+                    = filePathRepository.findPathIsDirType(Paths.get(path), getDirType().getTypeName());
+            result = listFile(filePath.getId());
+        }
+
+        return result;
+    }
+
+    public List<FilePath> searchFilePath(Controller_FileExplore.SearchParam param) {
+        String pathName = param.getPathName();
+        FilePath target = null;
+
+        if (Strings.isEmpty(pathName)) {
+            target = getRootFilePath();
+        }else{
+            target = this.getFileByFilePath(pathName);
+        }
+
+        if (Objects.isNull(target)) {
+            throw new IllegalArgumentException(String.format("Path is not present", pathName));
+        }else if(param.isEmpty()){
+            throw new IllegalArgumentException(String.format("No param set"));
+        }
+
+        return criteria
+                .findByParam(
+                        target,
+                        param.getFileName(),
+                        param.getFileType(),
+                        param.getTags(),
+                        param.getPage() == null ? 0 : param.getPage() * DATA_LENGTH,
+                        DATA_LENGTH);
+    }
+
     public void deleteFilePath(Integer id) throws FileNotFoundException {
         FilePath filePath = getFile(id);
         deleteFilePath(filePath);
@@ -95,21 +150,21 @@ public class Serv_GetFile_FromDatabase_Impl implements Serv_GetFile_FromDataBase
         }
     }
 
-    public FilePath getFileByFilePath(String path){
+    public FilePath getFileByFilePath(String path) {
         return filePathRepository.findFilePathByPath(Paths.get(path));
     }
 
-    public List<FilePath> getPathDirectory(String path) {
-        List<FilePath> result;
-        if (path == null || path.equals("/") || path.equals("")) {
-            result = listFile("/");
-        } else {
-            FilePath filePath
-                    = filePathRepository.findPathIsDirType(Paths.get(path), getDirType().getTypeName());
-            result = listFile(filePath.getId());
+    public FilePath getRootFilePath(){
+
+        String searchTarget;
+
+        if(pathProvider.isHideRealPath()){
+            searchTarget = "/";
+        }else{
+            searchTarget = pathProvider.getRootPath();
         }
 
-        return result;
+        return getFileByFilePath(searchTarget);
     }
 
     public <T> RequestResult<T> createRequestResult(boolean success, T obj, String msg) {

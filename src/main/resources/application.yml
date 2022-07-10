@@ -3,14 +3,16 @@ server:
 
 root:
   path: C:\Users\BabyPig\IdeaProjects
-  convert-file-tmp: C:\Users\BabyPig\IdeaProjects\.tmp
+  word2pdf:
+    static-location: C:\Users\BabyPig\IdeaProjects\.tmp
+    suffix: "系統預設"
 
 tagName:
   dir: Directory
   file: File
 
 setter:
-  start-mode: non
+  start-mode: rescan
   hidePath: true
 
 spring:
@@ -27,7 +29,7 @@ spring:
     view:
       prefix: /page
       suffix: .html
-#    static-path-pattern: rs/**
+  #    static-path-pattern: rs/**
 
   datasource:
     username: root

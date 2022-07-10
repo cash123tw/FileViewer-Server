@@ -1,19 +1,30 @@
 package Web.Controller.FileController;
 
 import App.Init.WordToPdf;
+import Data.Entity.FilePath;
 import Web.Service.FileIO.FileDownloader;
+import Web.Service.WordToPdf.Serv_W2Pdf;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.print.attribute.standard.Media;
+import java.beans.Encoder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.Objects;
 
 import static org.springframework.http.MediaType.*;
@@ -23,51 +34,53 @@ import static org.springframework.http.MediaType.*;
 public class FIleIO {
 
     private FileDownloader downloader;
-    private WordToPdf w2p;
+    private Serv_W2Pdf w2pService;
 
     @Autowired
-    public FIleIO(FileDownloader downloader, WordToPdf w2p) {
+    public FIleIO(FileDownloader downloader, Serv_W2Pdf w2pService) {
         this.downloader = downloader;
-        this.w2p = w2p;
+        this.w2pService = w2pService;
     }
 
     @GetMapping("")
+    @Transactional
     public ResponseEntity<byte[]> downloadFile(@RequestParam("id") Integer id,
                                                @RequestParam(value = "type", required = false) String type) throws Exception {
+        MediaType mediaType = null;
         File file
                 = downloader.getFile(id);
-        String fileName
-                = file.getName();
         ResponseEntity.BodyBuilder builder
                 = ResponseEntity.status(200);
-        MediaType mediaType;
 
         if (Strings.isNotEmpty(type)) {
-            if(type.toLowerCase().equals("pdf")){
-                mediaType = getMediaType(file);
-
-                if(!mediaType.equals(APPLICATION_PDF)){
-                    file = w2p.Word2Pdf(file);
-                    System.out.println("Convert");
-                    mediaType = getMediaType(file);
-                }
-            }else {
-                int endIndex = fileName.lastIndexOf(".");
-                fileName = fileName
-                        .substring(0, endIndex==-1?fileName.length():endIndex)
-                        .concat(".").concat(type);
-                mediaType = getMediaType(new File(fileName));
+            if ("pdf".equals(type.toLowerCase())) {
+                FilePath filePath = w2pService.transfer2Pdf(id);
+                mediaType = getMediaType(filePath.getPath());
+                file = downloader.getFile(filePath.getId());
             }
-        } else {
-            mediaType = getMediaType(file);
-            builder.header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment;filename=%s", fileName));
         }
 
+        if (Objects.isNull(mediaType)) {
+            mediaType = getMediaType(file);
+        }
+
+        String fileName = toPercentEncode(file.getName());
+
+        builder.header(HttpHeaders.CONTENT_DISPOSITION,
+                String.format("attachment; filename=%s; filename*=UTF-8''%s;", fileName, fileName));
         InputStream in
                 = new FileInputStream(file);
 
         return builder.contentType(mediaType).body(in.readAllBytes());
 
+    }
+
+    public MediaType getMediaType(String path) throws IOException {
+        return this.getMediaType(Paths.get(path));
+    }
+
+    public MediaType getMediaType(Path path) throws IOException {
+        return this.getMediaType(path.toFile());
     }
 
     public MediaType getMediaType(File file) throws IOException {
@@ -93,4 +106,18 @@ public class FIleIO {
         }
     }
 
+    public String toPercentEncode(String fileName) {
+
+        String fileType = "";
+        int lastDot = fileName.lastIndexOf(".");
+
+        if (lastDot != -1) {
+            fileType = fileName.substring(lastDot);
+        }
+
+        fileName =
+                URLEncoder.encode(fileName.replaceAll(fileType, ""), StandardCharsets.UTF_8).concat(fileType);
+
+        return fileName;
+    }
 }

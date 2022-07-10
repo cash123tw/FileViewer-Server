@@ -67,7 +67,7 @@ public class Controller_Tag {
         return result;
     }
 
-    @GetMapping(value = "/relateTagType/{id}", produces = "application/json")
+    @GetMapping(value = {"/relateTagType/{id}","/relateTagType/"}, produces = "application/json")
     public String getAllByTagType(@PathVariable(value = "id",required = false) Integer id,
                                   @RequestParam(value = "name", required = false) String tagName,
                                   HttpServletResponse response) {

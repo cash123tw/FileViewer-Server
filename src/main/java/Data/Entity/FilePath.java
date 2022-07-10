@@ -12,26 +12,13 @@ import javax.persistence.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Data
-//@SqlResultSetMapping(
-//        name = "Test",
-//        classes = {
-//                @ConstructorResult(
-//                        targetClass = FilePath.class,
-//                        columns = {
-//                                @ColumnResult(name = "id", type = int.class),
-//                                @ColumnResult(name = "file_name", type = String.class)
-//                        })})
-//@org.hibernate.annotations.NamedNativeQuery(
-//        name = "filepath.test",
-//        query = "select id,name as file_name from tag where id = :id",
-//        resultSetMapping = "Test"
-//)
 @NamedEntityGraphs({
         @NamedEntityGraph(
                 name = "FilePath.withParentIdAndPath",
@@ -49,15 +36,24 @@ import java.util.UUID;
         @NamedEntityGraph(
                 name = "FilePath.findAll",
                 attributeNodes = {
-                        @NamedAttributeNode(value = "tags"),
+                        @NamedAttributeNode(value = "tags",subgraph = "tags"),
                         @NamedAttributeNode(value = "parentPath"),
-                        @NamedAttributeNode(value = "fileType")
+                        @NamedAttributeNode(value = "fileType", subgraph = "fileType")
+                },
+                subgraphs = {@NamedSubgraph(name = "fileType",
+                        attributeNodes = {
+                                @NamedAttributeNode("id"),
+                                @NamedAttributeNode("typeName")
+                        }),
+                        @NamedSubgraph(name = "tags",
+                                attributeNodes = {
+                                        @NamedAttributeNode(value = "tagType", subgraph = "tagType")
+                                }),
+                        @NamedSubgraph(name = "tagType",
+                                attributeNodes = {
+                                        @NamedAttributeNode(value = "id"),
+                                        @NamedAttributeNode(value = "typeName")})
                 }
-//                subgraphs = @NamedSubgraph(name="fileType",
-//                attributeNodes = {
-//                        @NamedAttributeNode("id"),
-//                        @NamedAttributeNode("typeName")
-//                })
         )
 })
 public class FilePath {
@@ -67,8 +63,11 @@ public class FilePath {
     private Integer id;
     private String file_name;
     private UUID version;
+    private Date lastModify;
+    private Boolean missing = false;
 
     @Convert(converter = PathConvert.class)
+    @Column(unique = true)
     private Path path;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -125,6 +124,14 @@ public class FilePath {
 
     public void addTag(Tag tag) {
         getTags().add(tag);
+    }
+
+    public UUID getVersion(){
+        if(this.version == null){
+            this.setVersion(UUID.randomUUID());
+        }
+
+        return this.version;
     }
 
 }

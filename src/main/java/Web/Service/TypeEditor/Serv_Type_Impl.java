@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class Serv_Type_Impl implements Serv_Type {
@@ -40,6 +42,11 @@ public class Serv_Type_Impl implements Serv_Type {
         }
 
         return type;
+    }
+
+    @Override
+    public List<FileType> findAllFileType() {
+        return fileTypeRep.findAll();
     }
 
     public FileType getFileType(Path path) {

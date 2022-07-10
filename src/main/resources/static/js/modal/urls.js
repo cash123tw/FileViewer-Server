@@ -1,8 +1,11 @@
 export const urls = {
     'explore': {
         listFile: {method: 'get', url: '/explore'},
-        search: {method: 'get', url: '/explore/search'},
-        back: {method: 'get', url: 'explore/back'}
+        search: {method: 'post', url: '/explore/findByParam'},
+        back: {method: 'get', url: '/explore/back'}
+    },
+    fileType:{
+        findAll:{method:'get',url:'/fileType'},
     },
     detail: {
         findOne: {method: 'get', url: '/explore/detail/'},
@@ -17,7 +20,7 @@ export const urls = {
         delete: {method: 'delete', url: '/tag0'}
     },
     'tagType': {
-        findAll: {method: 'get', 'url': '/tagType'},
+        findAll: {method: 'get', url: '/tagType'},
         new: {method: 'post', url: '/tagType'},
         edit: {method: 'put', url: '/tagType'}
     },
