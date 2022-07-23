@@ -37,15 +37,6 @@ public class Controller_FileExplore {
         return mav;
     }
 
-//    @GetMapping({"/search"})
-//    public ModelAndView requestSearchPage(ModelAndView mav) {
-//        List<FilePath> files = fileService.listFile("/");
-//        mav.addObject("files", files);
-//        mav.addObject("move", "search");
-//        mav.setViewName("/seeker2");
-//        return mav;
-//    }
-
     /**
      * Get file list by root id.
      */

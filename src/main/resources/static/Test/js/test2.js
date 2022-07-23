@@ -10,57 +10,19 @@ const template = `
 const app = Vue.createApp({
     data() {
         return {
-            select:[],
-            map:new Map(),
-            type:{}
+            file:null
         }
     },
     methods: {
         show(){
-            console.log(this.map)
+            console.log(this.file)
+        },
+        fileUp(evn){
+            this.file = evn.target.files[0]
         }
     },
     mounted() {
-        this.map.set(1,{id:4,name:'A1'})
-        this.map.set(2,{id:5,name:'A2'})
-        this.map.set(3,{id:6,name:'A3'})
     },
-})
-
-app.component('test',{
-    template:template,
-    props:{
-        modelValue:{
-            type:Array,
-            default:new Array()
-        },
-        getList:{
-            type:String,
-            default:''
-        }
-    },
-    data() {
-        return {
-            count:5,
-            list:[
-                {id:2,name:'A2'},
-                {id:3,name:'A3'},
-                {id:1,name:'A1'},
-            ],
-        }
-    },
-    methods:{
-        show(){
-            alert('xxx')
-        }
-    },
-    watch:{
-        ss:{
-            handler:function(v,v2){
-                this.$emit('update:modelValue',v)
-            }
-        }
-    }
 })
 
 app.mount('#app')

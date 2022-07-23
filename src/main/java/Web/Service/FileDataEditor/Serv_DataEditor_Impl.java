@@ -32,9 +32,9 @@ import java.util.Set;
 @NoArgsConstructor
 public class Serv_DataEditor_Impl implements Serv_DataEditor {
 
-    @Value("${tagName.dir}")
+    @Value("${file-explore.naming.tag.dir}")
     public String TAG_NAME_DIR;
-    @Value("${tagName.file}")
+    @Value("${file-explore.naming.tag.file}")
     public String TAG_NAME_FILE;
 
     private FileExploreWorker exploreWorker;
@@ -66,7 +66,6 @@ public class Serv_DataEditor_Impl implements Serv_DataEditor {
     public FilePath saveDataToDataBase(FilePath filePath) throws FileNotFoundException, IllegalAccessException {
         if (pathProvider.isHideRealPath()) {
             String path = Paths.get(filePath.getPath()).toString();
-//            path = path.replace(Paths.get(pathProvider.getRootPath()).toString(), "");
             path = pathProvider.hideRealPath(path);
 
             if (!path.startsWith("\\")) {

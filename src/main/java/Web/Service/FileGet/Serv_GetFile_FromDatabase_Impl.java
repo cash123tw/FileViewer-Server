@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 public class Serv_GetFile_FromDatabase_Impl implements Serv_GetFile_FromDataBase {
 
-    private Integer DATA_LENGTH = 100;
+    private Integer DATA_LENGTH = 30;
 
     private FilePathRepository filePathRepository;
     private Serv_Type_Impl typeService;
@@ -165,42 +165,6 @@ public class Serv_GetFile_FromDatabase_Impl implements Serv_GetFile_FromDataBase
         }
 
         return getFileByFilePath(searchTarget);
-    }
-
-    public <T> RequestResult<T> createRequestResult(boolean success, T obj, String msg) {
-        RequestResult<T> result
-                = new RequestResult<>();
-        if (success) {
-            result.setResult(RequestResult.RequestResultType.SUCCESS);
-        } else {
-            result.setResult(RequestResult.RequestResultType.FAIL);
-        }
-
-        result.setMessage(msg);
-        result.setObj(obj);
-
-        return result;
-    }
-
-    public FileDetailResult transferFilePath2FileFileDetailResult(FilePath filePath) {
-
-        FilePath parent
-                = filePath.getParentPath();
-        FileType fileType
-                = filePath.getFileType();
-        boolean dir
-                = fileType.equals(getDirType());
-
-        FileDetailResult result = new FileDetailResult(
-                filePath.getId(),
-                filePath.getFile_name(),
-                filePath.getPath(),
-                fileType,
-                filePath.getTags(),
-                dir
-        );
-
-        return result;
     }
 
     public Data.Entity.FileType getDirType() {

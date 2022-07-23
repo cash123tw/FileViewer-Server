@@ -1,5 +1,5 @@
 import { urls } from '../../modal/urls.js'
-import 'https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js';
+import '../axios.min.js';
 
 const localhost = ""
 const template = `

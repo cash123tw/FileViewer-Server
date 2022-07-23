@@ -51,40 +51,8 @@
                             <a class="nav-link" name='tagType' href="/tagType/">標籤類型</a>
                         </li>
                     </ul>
-
-                    <button class="btn btn-close-white px-4 fw-bold btn-outline-success" type="button"
-                        data-bs-target="#search_areaX" data-bs-toggle="modal">Search</button>
                 </div>
         </nav>
-        <div class="modal fade" id="search_areaX" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog  modal-dialog-centered" >
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="exampleModalLabel">
-                            搜尋檔案
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form class="row" id="search_area_form">
-                            <div class="col-md-6">
-                                <label class="form-label">名稱</label>
-                                <input type="text" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">檔案類型</label>
-                                <select class="form-control" v-model="selected">
-                                    <option v-for="item in types" :value="item.id">{{item.name}}</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" @click="select()">Save changes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
 

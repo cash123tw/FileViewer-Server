@@ -1,5 +1,6 @@
 package App.Init;
 
+import App.AppStarter;
 import Bean.PathProvider;
 import Worker.FileExploreWorker;
 import Worker.FileSaverWorker;
@@ -18,13 +19,13 @@ import static App.Init.Init.*;
 @Configuration
 public class BeanSetter {
 
-    @Value("${root.path}")
+    @Value("${file-explore.explore.scan-path}")
     private String fileRoot;
-    @Value("${setter.hidePath}")
+    @Value("${file-explore.explore.hide-path}")
     private boolean hidePath;
-    @Value("${root.word2pdf.static-location}")
+    @Value("${file-explore.word2pdf.download-location}")
     private String w2p_location;
-    @Value("${root.word2pdf.suffix}")
+    @Value("${file-explore.word2pdf.suffix}")
     private String w2p_suffix;
 
     /**
@@ -33,7 +34,7 @@ public class BeanSetter {
      * 2)rescan: run check method again,check file is all upload to database;
      * 3)non: start without do anything;
      */
-    @Value("${setter.start-mode}")
+    @Value("${file-explore.explore.start-mode}")
     private String start_mode = "non";
 
     @Bean

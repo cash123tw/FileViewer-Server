@@ -1,5 +1,6 @@
 package Web.Service.FileIO;
 
+import Bean.FileDetail;
 import Data.Entity.FilePath;
 import Data.Entity.FileType;
 import Data.Entity.Tag;
@@ -12,21 +13,18 @@ import Worker.FileExploreWorker;
 import Worker.FileSaverWorker;
 import lombok.Data;
 import lombok.extern.java.Log;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
-import org.thymeleaf.standard.expression.EqualsNotEqualsExpression;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,11 +58,32 @@ public class FileUpload {
         this.finderWorker = finderWorker;
     }
 
+    public FilePath createNewDirectory(Path path, String dir_name) throws FileAlreadyExistsException, IllegalAccessException, FileNotFoundException {
+        if (Strings.isEmpty(dir_name)) {
+            throw new IllegalAccessException("資料夾名稱不為空!");
+        }
+
+        path = Paths.get(path.toString(), dir_name);
+        FilePath filePath = fileService.getFileByFilePath(path.toString());
+
+        if (Objects.nonNull(filePath)) {
+            throw new FileAlreadyExistsException(String.format("資料夾 [%s] 已經存在 ", dir_name));
+        }
+
+        path = finderWorker.getPathProvider().getPath(path.toString());
+        File file = makeDirectory(path);
+        filePath = new FilePath(
+                dir_name,
+                Path.of(finderWorker.getPathProvider().hideRealPath(path.toString())),
+                fileService.getDirType());
+        return dataService.saveDataToDataBase(filePath);
+    }
+
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public FilePath SaveNewDataToLocal(FilePath filePath,
                                        MultipartFile file) throws Exception {
         FilePath target
-                = saveFile(filePath, file);
+                = saveNewFile(filePath, file);
         target = fileService.getFile(target.getId());
         return target;
     }
@@ -81,6 +100,7 @@ public class FileUpload {
         String origin_file_name = "";
         FileType fileType = filePath.getFileType();
         DeleteFileTask deleteFileTask = null;
+        SaveFileTask saveFileTask = null;
         FilePath newFilePath = null;
         FilePath old_filePath = fileService.getFile(filePath.getId());
         String old_path = old_filePath.getPath();
@@ -115,11 +135,16 @@ public class FileUpload {
                         = getLastFileNameFromPath(Paths.get(old_path)).replace(old_file_name, new_file_name);
                 MockMultipartFile multiPartFile
                         = new MockMultipartFile(full_file_name, new FileInputStream(old_file));
-                saveFileToLocal(multiPartFile, newFilePath.getPath());
+                saveFileTask = saveFileToLocal(multiPartFile, newFilePath.getPath());
+                checkFilePathExists(newFilePath);
             }
 
             newFilePath = saveFilePath(newFilePath);
             success = true;
+        } catch (Exception e) {
+            if (Objects.nonNull(saveFileTask))
+                saveFileTask.rollBack();
+            throw e;
         } finally {
             if (Objects.nonNull(deleteFileTask) && success) {
                 deleteFileTask.flush();
@@ -129,7 +154,7 @@ public class FileUpload {
         return newFilePath;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void DeleteFilePath(FilePath filePath) throws FileNotFoundException, FileVersionNotMatchException, IllegalAccessException {
         Assert.notNull(filePath.getId(), "File Id is not exists\ncan't not delete");
 
@@ -153,10 +178,29 @@ public class FileUpload {
         }
     }
 
-    private FilePath saveFilePath(FilePath filePath) throws FileNotFoundException, IllegalAccessException {
+    private File makeDirectory(Path path) throws FileAlreadyExistsException {
+        File file = path.toFile();
+        if (file.exists() && file.isDirectory()) {
+            throw new FileAlreadyExistsException(String.format("資料夾已存在"));
+        } else {
+            file.mkdir();
+        }
+
+        return file;
+    }
+
+    private FilePath saveFilePath(FilePath filePath) throws FileNotFoundException, IllegalAccessException, FileSaveException {
         filePath.setVersion(UUID.randomUUID());
         filePath = dataService.saveDataToDataBase(filePath);
         return filePath;
+    }
+
+    private void checkFilePathExists(FilePath filePath) throws FileSaveException {
+        FilePath checkExists
+                = fileService.getFileByFilePath(filePath.getPath());
+        if (Objects.nonNull(checkExists)) {
+            throw new FileSaveException("File path already exists");
+        }
     }
 
     private FilePath makeFilePath(FilePath filePath, String origin_file_name)
@@ -210,28 +254,26 @@ public class FileUpload {
         return filePath;
     }
 
-    private FilePath saveFile(FilePath filePath, MultipartFile file)
+    private FilePath saveNewFile(FilePath filePath, MultipartFile file)
             throws Exception {
-        FilePath tmp = makeFilePath(filePath, file.getOriginalFilename().replaceAll("[\\\\/:*?\"<>|]", "_"));
-        String path = tmp.getPath();
-        saveFileToLocal(file, path);
 
-        filePath = saveFilePath(tmp);
-        return filePath;
+        SaveFileTask saveFileTask = null;
+
+        try {
+            FilePath tmp = makeFilePath(filePath, file.getOriginalFilename().replaceAll("[\\\\/:*?\"<>|]", "_"));
+            String path = tmp.getPath();
+            saveFileTask = saveFileToLocal(file, path);
+            filePath = saveFilePath(tmp);
+            return filePath;
+        } catch (Exception e) {
+            if (Objects.nonNull(saveFileTask))
+                saveFileTask.rollBack();
+            throw e;
+        }
     }
 
-    private void saveFileToLocal(MultipartFile file, String path) throws IOException, IllegalAccessException {
-        ByteBuffer bytes
-                = ByteBuffer.wrap(file.getBytes());
-        FileSaverWorker.SaveResult result
-                = saverWorker.saveNewFile(path, "", false, false, bytes);
-        if (!result.isResult()) {
-            String message = result
-                    .getMessages()
-                    .stream()
-                    .collect(Collectors.joining("\n"));
-            throw new FileSaveException(message);
-        }
+    private SaveFileTask saveFileToLocal(MultipartFile file, String path) throws IOException, IllegalAccessException {
+        return SaveFileTask.saveFile(this.saverWorker, this.finderWorker, Paths.get(path), file.getInputStream());
     }
 
     public static String getLastFileNameFromPath(Path path) {
@@ -267,6 +309,40 @@ public class FileUpload {
             this.newFilePath = newFilePath;
         }
 
+    }
+
+    @Log
+    static public class SaveFileTask {
+        private Path path;
+
+        public SaveFileTask(Path path) {
+            this.path = path;
+        }
+
+        static SaveFileTask saveFile(FileSaverWorker saverWorker, FileExploreWorker finder, Path path, InputStream in) throws IOException, IllegalAccessException {
+            ByteBuffer bytes
+                    = ByteBuffer.wrap(in.readAllBytes());
+            FileSaverWorker.SaveResult result
+                    = saverWorker.saveNewFile(path.toString(), "", false, false, bytes);
+            if (!result.isResult()) {
+                String message = result
+                        .getMessages()
+                        .stream()
+                        .collect(Collectors.joining("\n"));
+                throw new FileSaveException(message);
+            }
+            return new SaveFileTask(Paths.get(finder.getFile(path.toString()).getFilePath()));
+        }
+
+        public void rollBack() {
+            File file = this.path.toFile();
+            if (file.exists()) {
+                boolean delete = file.delete();
+                if (delete) {
+                    log.warning(String.format("File Saver roll back ,delete file [%s]", path));
+                }
+            }
+        }
     }
 
     @Data

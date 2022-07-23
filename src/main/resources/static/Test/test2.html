@@ -11,9 +11,8 @@
 
 <body>
     <div id="app">
-        <test >
-        </test>
-        <button @click="d">Show</button>
+        <input type="file" @change="fileUp">
+        <button @click.prevent="show">Show</button>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"

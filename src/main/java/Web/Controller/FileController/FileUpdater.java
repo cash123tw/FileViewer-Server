@@ -14,6 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -52,6 +55,11 @@ public class FileUpdater {
                 .map(Tag::new)
                 .collect(Collectors.toSet());
         tags.addAll(result);
+
+        if (Objects.nonNull(filePath.getTags())) {
+            filePath.getTags().addAll(tags);
+        }
+
         filePath.setTags(tags);
 
         return filePath;

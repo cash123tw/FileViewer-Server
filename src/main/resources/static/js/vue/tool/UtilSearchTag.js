@@ -1,5 +1,5 @@
 import { urls } from '../../modal/urls.js'
-import 'https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js';
+import '../vue-cookies.js';
 
 const template = `
 <div class="row">
@@ -13,11 +13,10 @@ const template = `
             </select>
 
             <span class="input-group-text">標籤</span>
-            <select class="form-select" v-model="searchTag.select">
+            <select class="form-select" v-model="searchTag.select" @change="this.$emit('update:modelValue',this.searchTag.select)">
                 <option v-for="tag in tagList" :value="tag" :label="tag.name">{{tag.name}}</option>
             </select>
 
-            <button class="btn btn-outline-success" @click="addTag">增加</button>
         </div>
     </div>
 </div>`
@@ -27,7 +26,6 @@ export default {
     methods: {
         listTagByTagType: listTagByTagType,
         listTagType: listTagType,
-        addTag: addTag
     },
     data() {
         return {
@@ -37,7 +35,7 @@ export default {
                 select: null,
             },
             searchTag: {
-                select: null
+                select: null,
             }
         }
     },
@@ -45,13 +43,6 @@ export default {
     mounted() {
         this.listTagType();
     },
-}
-
-function addTag() {
-    let value = this.searchTag.select;
-    if (value == null)
-        return;
-    this.$emit('addTag', value);
 }
 
 function listTagType() {

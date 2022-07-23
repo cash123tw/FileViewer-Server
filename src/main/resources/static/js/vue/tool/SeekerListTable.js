@@ -1,4 +1,3 @@
-
 const template = `
 <div class="container border border-2 rounded-2 mt-3 mb-5">
     <div class="row justify-content-center">

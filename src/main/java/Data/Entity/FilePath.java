@@ -71,6 +71,7 @@ public class FilePath {
     private Path path;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     @JoinColumn(
             name = "parent",
             referencedColumnName = "id",
@@ -111,7 +112,11 @@ public class FilePath {
     }
 
     public String getPath() {
-        return path.toString().replace('\\', '/');
+        String result = path.toString().replace('\\', '/');
+        if(!result.startsWith("/")){
+            result = "/"+result;
+        }
+        return result;
     }
 
     public void setPath(String path) {

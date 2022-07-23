@@ -29,6 +29,9 @@ export const urls = {
         tag: '/tag0/',
         tagType: '/tagType/'
     },
+    directory:{
+        addDirectory:{method:'post',url:'/directory/addDirectory'}
+    },
     upload: {
         new: {method: 'post', url: '/file'},
         update: {method: 'put', url: '/file'},
