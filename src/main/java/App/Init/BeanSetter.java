@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 
+import javax.annotation.PostConstruct;
 import java.io.FileNotFoundException;
 import java.util.*;
 

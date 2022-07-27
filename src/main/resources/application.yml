@@ -4,7 +4,7 @@ server:
 file-explore:
   explore:
     scan-path: C:\Users\BabyPig\IdeaProjects
-    start-mode: rescan
+    start-mode: non
     hide-path: true
   word2pdf:
     download-location: C:\Users\BabyPig\IdeaProjects\.tmp

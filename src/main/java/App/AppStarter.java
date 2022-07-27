@@ -6,17 +6,21 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.yaml.snakeyaml.Yaml;
 
 import java.awt.*;
 import java.io.*;
-import java.net.*;
-import java.nio.file.Paths;
-import java.util.Enumeration;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Scanner;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static App.Init.Init.StartMode;
 import static App.Init.Init.StartMode.*;
@@ -28,31 +32,55 @@ import static App.Init.Init.StartMode.*;
 public class AppStarter {
 
     private static ConfigurableApplicationContext app;
+    private static Desktop desktop;
+    private static Scanner scanner = new Scanner(System.in);
+    private static ReentrantLock lock = new ReentrantLock();
+    private static final String showText = """
+                歡迎來到操作介面，輸入以下框格內的文字可以進行操作:
+                [restart] 重啟服務
+                [close] 關閉服務
+                你的輸入 :　
+            """;
 
-    public static void main(String[] args) throws IOException {
-        Desktop desktop = Desktop.getDesktop();
-        StartSystem();
-
-        if (desktop.isSupported(Desktop.Action.BROWSE)) {
-            URI uri = URI.create("http://localhost:9090/");
-            desktop.browse(uri);
-        }
+    public static void main(String[] args) throws IOException, InterruptedException {
+        desktop = Desktop.getDesktop();
+        System.setProperty("spring.config.additional-location", "optional:file:scanSet.yml");
+        controlSystem(SystemOpt.RESTART);
+        HumanPanelStart();
     }
 
     public static void printNetLocal() throws UnknownHostException {
         InetAddress localHost = InetAddress.getLocalHost();
         String hostName = localHost.getHostAddress();
-        log.info(String.format("Wifi : [%s]\tURL : [%s]","Hello","http://"+hostName+":9090"));
+        log.info(String.format("Wifi : [%s]\tURL : [%s]", "Hello", "http://" + hostName + ":9090"));
     }
 
-    public static void reStartSystem() throws IOException, InterruptedException {
+    public static void controlSystem(SystemOpt opt) throws IOException {
+        if (lock.isLocked()) {
+            return;
+        } else {
+            switch (opt) {
+                case CLOSE -> {
+                    closeSystem();
+                }
+                case RESTART -> {
+                    reStartSystem();
+                }
+            }
+        }
+
+    }
+
+    private static void reStartSystem() throws IOException {
+        closeSystem();
+        StartSystem();
+    }
+
+    private static void closeSystem() {
         if (Objects.nonNull(app)) {
             app.close();
             app = null;
-            Thread.sleep(1000);
         }
-
-        StartSystem();
     }
 
     private static void StartSystem() throws IOException {
@@ -60,6 +88,40 @@ public class AppStarter {
             app = SpringApplication.run(AppStarter.class);
         }
         printNetLocal();
+//        StartWebView();
+    }
+
+    private static void StartWebView() {
+        if (desktop.isSupported(Desktop.Action.BROWSE)) {
+            URI uri = URI.create("http://localhost:9090/");
+            try {
+                desktop.browse(uri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void HumanPanelStart() throws IOException, InterruptedException {
+        System.out.println(String.format(showText));
+
+        out:
+        while (scanner.hasNextLine()) {
+            String opt = scanner.nextLine();
+
+            switch (opt.toLowerCase()) {
+                case "close" -> {
+                    controlSystem(SystemOpt.CLOSE);
+                    break out;
+                }
+                case "restart" -> {
+                    controlSystem(SystemOpt.RESTART);
+                }
+                default -> {
+                    System.out.println(String.format(showText));
+                }
+            }
+        }
     }
 
     public static class ApplicationSetting {
@@ -248,4 +310,7 @@ public class AppStarter {
         }
     }
 
+    public enum SystemOpt {
+        CLOSE, RESTART
+    }
 }

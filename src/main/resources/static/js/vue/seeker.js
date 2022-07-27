@@ -1,4 +1,5 @@
 import * as Vue from '../vue/vue.js';
+// import * as Vue from 'https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.37/vue.esm-browser.min.js';
 import "../vue/vue-cookies.js";
 import '../vue/axios.min.js';
 import {urls} from '../modal/urls.js'
