@@ -1,8 +1,7 @@
 import App.AppStarter;
+import App.Security.AuthenticationService;
 import Data.Criteria.MineCriteria;
-import Data.Entity.FilePath;
-import Data.Entity.FileType;
-import Data.Entity.Tag;
+import Data.Entity.*;
 import Data.Repository.FilePathRepository;
 import Web.Service.FileGet.Serv_GetFile_FromDatabase_Impl;
 import Web.Service.FileIO.FileUpload;
@@ -33,6 +32,8 @@ public class Tester {
     MineCriteria criteria;
     @Autowired
     FilePathRepository fr;
+    @Autowired
+    AuthenticationService authService;
 //    @Autowired
 //    MockMvc mockMVC;
 //    @Autowired
@@ -45,13 +46,12 @@ public class Tester {
 //    }
 
 
-//    @Test
+    @Test
     public void test1() throws Exception {
-        FilePath f = fr.findById(157).get();
-        fr.delete(f);
+
     }
 
-//    @Test
+    //    @Test
     public void test2() {
         Page<FilePath> all = fr.findAll(PageRequest.of(1, 100));
         System.out.println();

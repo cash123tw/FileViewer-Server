@@ -18,20 +18,20 @@
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../css/normal.css" th:href="@{/css/normal.css}" rel="stylesheet">
 </head>
-<script>
-    $(window).on('load', () => {
-        let a = $("#items").find('a');
-        for (let i = 0; i < a.length; i++) {
-            let aa = a[i];
-            let key = a.attr('name');
-            let url = URLS.view[key];
-            $(aa).attr('href', url)
-        }
-    })
-</script>
 
 <body>
     <div th:fragment="head">
+        <script>
+            $(window).on('load', () => {
+                let a = $("#items").find('a');
+                for (let i = 0; i < a.length; i++) {
+                    let aa = $(a[i]);
+                    let key = aa.attr('name');
+                    let url = URLS.view[key];
+                    $(aa).attr('href', url)
+                }
+            })
+        </script>
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
             <div class="container">
                 <a class="navbar-brand " href="/">File Explore</a>
@@ -49,6 +49,22 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" name='tagType' href="/tagType/">標籤類型</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" id="signMenu">系統登入 :
+                                <span th:text="${user==null}?'未登入':${user.username}">xxx</span>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="signMenu">
+                                <th:block th:if="${user!=null}">
+                                    <li class="nav-item"><a class="dropdown-item" href="#" name="userDetail">用戶資料</a>
+                                    </li>
+                                    <li class="nav-item"><a class="dropdown-item" href="#" name="logout">登出</a></li>
+                                </th:block>
+                                <th:block th:if="${user==null}">
+                                    <li class="nav-item"><a class="dropdown-item" href="#" name="login">登入</a></li>
+                                    <li class="nav-item"><a class="dropdown-item" href="#" name="regist">註冊</a></li>
+                                </th:block>
+                            </ul>
                         </li>
                     </ul>
                 </div>

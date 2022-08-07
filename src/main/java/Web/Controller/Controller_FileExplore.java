@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +33,7 @@ public class Controller_FileExplore {
     private Serv_GetFile_FromDatabase_Impl fileService;
 
     @GetMapping({"/"})
-    public ModelAndView requestWebPage(ModelAndView mav) {
+    public ModelAndView requestWebPage(ModelAndView mav, HttpServletRequest request) {
         mav.setViewName("/seeker2");
         return mav;
     }
@@ -43,7 +44,8 @@ public class Controller_FileExplore {
     @GetMapping("")
     public List<FilePath> getAllFilePath(
             @RequestParam(required = false) Integer id,
-            @RequestParam(required = false, defaultValue = "/") String path) {
+            @RequestParam(required = false, defaultValue = "/") String path,
+            HttpServletRequest request) {
         List<FilePath> result;
         if (Objects.nonNull(id)) {
             result = fileService.listFile(id);
@@ -61,8 +63,7 @@ public class Controller_FileExplore {
      * Search in path by file name.
      */
     @PostMapping("/findByParam")
-    @CrossOrigin()
-    public List<FilePath> searchFile(@RequestBody SearchParam searchParam) {
+    public List<FilePath> searchFile(@RequestBody SearchParam searchParam,HttpServletRequest request) {
         List<FilePath> filePaths
                 = fileService.searchFilePath(searchParam);
         filePaths.stream()
@@ -74,7 +75,7 @@ public class Controller_FileExplore {
     @GetMapping("/back")
     public List<FilePath> backToPath(String path) {
         List<FilePath> result
-                = getAllFilePath(null, path);
+                = getAllFilePath(null, path,null);
         result.stream()
                 .forEach(this::ensureParentPathNotLoopGet);
         return result;

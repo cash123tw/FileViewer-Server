@@ -1,12 +1,19 @@
 const URLS = {
     'explore': {
         listFile: {method: 'get', url: '/explore'},
-        search: {method: 'get', url: '/explore/search'},
-        back: {method: 'get', url: 'explore/back'}
+        search: {method: 'post', url: '/explore/findByParam'},
+        back: {method: 'get', url: '/explore/back'}
+    },
+    fileType:{
+        findAll:{method:'get',url:'/fileType'},
     },
     detail: {
-        newOne: {method: 'get', url: '/explore/detail/'},
         findOne: {method: 'get', url: '/explore/detail/'},
+        newOne: {method: 'get', url: '/explore/detail/'}
+    },
+    log:{
+      regist:{method:'post',url:'/log/regist'},
+      signIn:{method:'post',url:'/log/signIn'},
     },
     'tag': {
         find: '/tag/find',
@@ -17,18 +24,28 @@ const URLS = {
         delete: {method: 'delete', url: '/tag0'}
     },
     'tagType': {
-        findAll: {method: 'get', 'url': '/tagType'},
+        findAll: {method: 'get', url: '/tagType'},
         new: {method: 'post', url: '/tagType'},
         edit: {method: 'put', url: '/tagType'}
     },
     'view': {
         explore: '/explore/',
         tag: '/tag0/',
-        tagType: '/tagType/'
+        tagType: '/tagType/',
+        userDetail: '/user',
+        logout: '/logout',
+        login: '/log/login',
+        regist: '/log/regist'
+    },
+    directory:{
+        addDirectory:{method:'post',url:'/directory/addDirectory'}
     },
     upload: {
         new: {method: 'post', url: '/file'},
         update: {method: 'put', url: '/file'},
         delete: {method: 'delete', url: '/file'},
+    },
+    download: {
+        get: {method:'get',url:'/io'}
     }
 }
