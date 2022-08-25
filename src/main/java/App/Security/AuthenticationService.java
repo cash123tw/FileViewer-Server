@@ -1,20 +1,25 @@
 package App.Security;
 
+import Data.Entity.Role;
 import Data.Entity.UserInfo;
 import Data.Repository.UserInfoRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.catalina.User;
+import Web.Service.UserInfoService;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Claim;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.config.authentication.PasswordEncoderParser;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.naming.AuthenticationException;
 import java.nio.CharBuffer;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static Data.Entity.Role.*;
 
 @Service
 public class AuthenticationService {
@@ -22,7 +27,9 @@ public class AuthenticationService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
-    private UserInfoRepository userInfoRepository;
+    private UserInfoService userInfoService;
+    @Autowired
+    private JWT_Token_Center jwtTokenCenter;
 
     public UserInfo authenticate(String user, String password) throws AuthenticationException {
         UserInfo userInfo = getUserInfo(user);
@@ -34,34 +41,33 @@ public class AuthenticationService {
     }
 
     public UserInfo authenticateToken(String token) throws AuthenticationException {
-        UserInfo userInfo = getUserInfo(token);
-        return userInfo;
+        try {
+            UserInfo userInfo
+                    = jwtTokenCenter.VerifyJWT_UserInfo(token);
+            return userInfo;
+        }catch (JWTVerificationException e){
+            e.printStackTrace();
+            throw new AuthenticationException("不合法的Token");
+        }
     }
 
-    public void saveUserInfo(UserInfo userInfo) {
-        if (Strings.isEmpty(userInfo.getUsername())
-                && Strings.isEmpty(userInfo.getPassword())) {
-            throw new IllegalArgumentException("帳號密碼有誤");
-        }
-        String password = userInfo.getUsername();
-        password = passwordEncoder.encode(password);
-        userInfo.setPassword(password);
-
-        userInfoRepository.save(userInfo);
+    public Optional<UserInfo> getUserInfo0(String user) {
+        Optional<UserInfo> info
+                = userInfoService.getUserByUserName(user);
+        return info;
     }
 
     private UserInfo getUserInfo(String user) throws AuthenticationException {
-        Optional<UserInfo> info
-                = userInfoRepository.findByUsername(user);
+        Optional<UserInfo> info = getUserInfo0(user);
         if (info.isEmpty()) {
             throw new AuthenticationException("帳號不存在");
         }
         return info.get();
     }
 
-
-    private boolean matchPassword(String password, String masterPassword) {
+    public boolean matchPassword(String password, String masterPassword) {
         return passwordEncoder.matches(CharBuffer.wrap(password), masterPassword);
     }
 
+//    ===================================================================================
 }

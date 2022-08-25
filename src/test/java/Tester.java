@@ -5,21 +5,21 @@ import Data.Entity.*;
 import Data.Repository.FilePathRepository;
 import Web.Service.FileGet.Serv_GetFile_FromDatabase_Impl;
 import Web.Service.FileIO.FileUpload;
-import org.assertj.core.util.Sets;
+import Web.Service.UserInfoService;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 @SpringBootTest(classes = AppStarter.class)
+@EnableWebSecurity
 //@AutoConfigureMockMvc
 //@WebAppConfiguration
 public class Tester {
@@ -34,6 +34,8 @@ public class Tester {
     FilePathRepository fr;
     @Autowired
     AuthenticationService authService;
+    @Autowired
+    UserInfoService userInfoService;
 //    @Autowired
 //    MockMvc mockMVC;
 //    @Autowired
@@ -48,7 +50,13 @@ public class Tester {
 
     @Test
     public void test1() throws Exception {
-
+        Optional<UserInfo> user =
+                userInfoService.getUserByUserName("ccwa56c");
+        UserInfo userInfo
+                = user.get();
+        userInfo.setUsername("aaaaxxxx");
+        userInfo.setPassword("123a");
+        userInfoService.updateUserInfo(userInfo);
     }
 
     //    @Test

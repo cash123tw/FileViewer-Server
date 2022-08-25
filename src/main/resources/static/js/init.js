@@ -14,6 +14,7 @@ const URLS = {
     log:{
       regist:{method:'post',url:'/log/regist'},
       signIn:{method:'post',url:'/log/signIn'},
+      checkExists:{method:'get',url:'/log/checkUsername'},
     },
     'tag': {
         find: '/tag/find',
@@ -35,7 +36,9 @@ const URLS = {
         userDetail: '/user',
         logout: '/logout',
         login: '/log/login',
-        regist: '/log/regist'
+        regist: '/log/regist',
+        admin_user:'/admin/user_info',
+        user_detail:'/user',
     },
     directory:{
         addDirectory:{method:'post',url:'/directory/addDirectory'}
@@ -47,5 +50,14 @@ const URLS = {
     },
     download: {
         get: {method:'get',url:'/io'}
+    },
+    admin:{
+        getAllUser:{method:'get',url:'/admin/user_info/all'},
+        updateUser:{method:'put',url:'/admin/user_info/'},
+        roles:{method:'get',url:'/admin/user_info/'}
+    },
+    user:{
+        detail:{method:'get',url:'/user/'}
     }
 }
+

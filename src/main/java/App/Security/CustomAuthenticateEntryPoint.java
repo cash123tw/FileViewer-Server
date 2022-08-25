@@ -31,7 +31,7 @@ public class CustomAuthenticateEntryPoint implements AuthenticationEntryPoint {
                       crossorigin="anonymous">
             <script>
                 window.onload=()=>{
-                    window.location = "/";
+                    window.location = "/log/login?message=%s";
                 }
             </script>
             </head>
@@ -41,24 +41,32 @@ public class CustomAuthenticateEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         String path = request.getServletPath();
+
         Optional<Cookie> first
                 = Arrays
-                .stream(request.getCookies())
+                .stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[]{new Cookie("TT","")}))
                 .filter(c -> CookieAuthenticateFilter.COOKIE_NAME.equals(c.getName()))
                 .findFirst();
+
+        String message
+                = Optional
+                .ofNullable(authException.getMessage())
+                .orElse("");
 
         if (first.isPresent()) {
             Cookie cookie = new Cookie(CookieAuthenticateFilter.COOKIE_NAME, "");
             cookie.setMaxAge(0);
             response.addCookie(cookie);
             response.setHeader(HttpHeaders.CONTENT_TYPE,"text/html;charset=UTF-8");
-            response.getOutputStream().write(redirectFunc.getBytes(StandardCharsets.UTF_8));
+            response.getOutputStream()
+                    .write(String.format(redirectFunc, message)
+                    .getBytes(StandardCharsets.UTF_8));
             return;
         }
 
         if (SecurityConfig.SIGNIN.equals(path)) {
             response.setStatus(403);
-            response.getOutputStream().write(authException.getMessage().getBytes(StandardCharsets.UTF_8));
+            response.getOutputStream().write(message.getBytes(StandardCharsets.UTF_8));
         } else {
             response.setStatus(301);
             response.addHeader("Location", SecurityConfig.LOGIN);

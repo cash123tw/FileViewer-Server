@@ -13,7 +13,7 @@ file-explore:
     tag:
       dir: Directory
       file: file
-  inited: false
+  secret-key: Mine_Key...
 
 spring:
   servlet:

@@ -11,6 +11,11 @@ export const urls = {
         findOne: {method: 'get', url: '/explore/detail/'},
         newOne: {method: 'get', url: '/explore/detail/'}
     },
+    log:{
+      regist:{method:'post',url:'/log/regist'},
+      signIn:{method:'post',url:'/log/signIn'},
+      checkExists:{method:'get',url:'/log/checkUsername'},
+    },
     'tag': {
         find: '/tag/find',
         find_by_tag_type_id: {method: 'get', url: '/tag/relateTagType/id'},
@@ -27,7 +32,12 @@ export const urls = {
     'view': {
         explore: '/explore/',
         tag: '/tag0/',
-        tagType: '/tagType/'
+        tagType: '/tagType/',
+        userDetail: '/user',
+        logout: '/logout',
+        login: '/log/login',
+        regist: '/log/regist',
+        admin_user:'/admin/user_info',
     },
     directory:{
         addDirectory:{method:'post',url:'/directory/addDirectory'}
@@ -39,5 +49,15 @@ export const urls = {
     },
     download: {
         get: {method:'get',url:'/io'}
+    },
+    admin:{
+        getAllUser:{method:'get',url:'/admin/user_info/all'},
+        updateUser:{method:'put',url:'/admin/user_info/'},
+        roles:{method:'get',url:'/admin/user_info/'}
+    },
+    user:{
+        detail:{method:'get',url:'/user/'},
+        updatePassword:{method:'put',url:'/user/'}
     }
 }
+

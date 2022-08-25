@@ -1,0 +1,52 @@
+package Web.Controller;
+
+import Data.Entity.UserInfo;
+import Web.Service.UserInfoService;
+import org.apache.catalina.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.naming.AuthenticationException;
+
+@RestController
+@RequestMapping("/user")
+public class Controller_UserInfo {
+
+    @Autowired
+    private UserInfoService userInfoService;
+
+    @GetMapping()
+    public ModelAndView getUserDetailPage(ModelAndView mav) {
+        mav.setViewName("/user/detail");
+        return mav;
+    }
+
+    @GetMapping("/")
+    public UserInfo getMineUserDetail(@AuthenticationPrincipal UserInfo userInfo) {
+        return userInfo;
+    }
+
+    @PutMapping("/")
+    public ResponseEntity<String> updatePassword(
+            @AuthenticationPrincipal UserInfo nowerUser,
+            String oldPassword,
+            String newPassword) {
+
+        String message = "輸入數據異常";
+        Integer status = 400;
+
+        try {
+            userInfoService.updatePassword(nowerUser,oldPassword,newPassword);
+        } catch (AuthenticationException e) {
+            message = e.getMessage();
+        }
+
+        return ResponseEntity
+                .status(status)
+                .body(message);
+    }
+
+}
