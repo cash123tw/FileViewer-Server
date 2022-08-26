@@ -1,5 +1,9 @@
 package App;
 
+import App.Security.AuthenticationService;
+import Data.Entity.Role;
+import Data.Entity.UserInfo;
+import Web.Service.UserInfoService;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import org.springframework.boot.SpringApplication;
@@ -17,10 +21,7 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static App.Init.Init.StartMode;
@@ -43,7 +44,7 @@ public class AppStarter {
                 你的輸入 :　
             """;
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
         desktop = Desktop.getDesktop();
         System.setProperty("spring.config.additional-location", "optional:file:scanSet.yml");
         controlSystem(SystemOpt.RESTART);
@@ -56,7 +57,7 @@ public class AppStarter {
         log.info(String.format("Wifi : [%s]\tURL : [%s]", "Hello", "http://" + hostName + ":9090"));
     }
 
-    public static void controlSystem(SystemOpt opt) throws IOException {
+    public static void controlSystem(SystemOpt opt) throws Exception {
         if (lock.isLocked()) {
             return;
         } else {
@@ -72,7 +73,7 @@ public class AppStarter {
 
     }
 
-    private static void reStartSystem() throws IOException {
+    private static void reStartSystem() throws Exception {
         closeSystem();
         StartSystem();
     }
@@ -103,7 +104,7 @@ public class AppStarter {
         }
     }
 
-    private static void HumanPanelStart() throws IOException, InterruptedException {
+    private static void HumanPanelStart() throws Exception {
         System.out.println(String.format(showText));
 
         out:

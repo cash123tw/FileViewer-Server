@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <head>
     <meta charset="UTF-8">
@@ -15,75 +15,80 @@
     <script th:src="@{/js/type_resolver.js}"></script>
     <script th:src="@{/js/tag_type.js}"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../css/normal.css" th:href="@{/css/normal.css}" rel="stylesheet">
 </head>
 
 <body>
-    <div th:fragment="head">
-        <script>
-            $(window).on('load', () => {
-                let a = $("#items").find('a');
-                for (let i = 0; i < a.length; i++) {
-                    let aa = $(a[i]);
-                    let key = aa.attr('name');
-                    let url = URLS.view[key];
-                    $(aa).attr('href', url)
-                }
-            })
-        </script>
-        <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
-            <div class="container">
-                <a class="navbar-brand " href="/">File Explore</a>
-                <button class="navbar-toggler" type="button" data-bs-target="#items" data-bs-toggle="collapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+<div th:fragment="head">
+    <script>
+        $(window).on('load', () => {
+            let a = $("#items").find('a');
+            for (let i = 0; i < a.length; i++) {
+                let aa = $(a[i]);
+                let key = aa.attr('name');
+                let url = URLS.view[key];
+                $(aa).attr('href', url)
+            }
+        })
+    </script>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
+        <div class="container">
+            <a class="navbar-brand " href="/">File Explore</a>
+            <button class="navbar-toggler" type="button" data-bs-target="#items" data-bs-toggle="collapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <div class="collapse navbar-collapse" id="items">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" name='explore' href="/explore/">檔案檢視</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" name='tag' href="/tag0/">標籤</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" name='tagType' href="/tagType/">標籤類型</a>
-                        </li>
-                        <li class="nav-item" th:if="${user!=null} && ${user.getRoles().contains(Role.ADMIN.name())}">
-                            <a class="nav-link" name='admin_user' href="#">管理</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" id="signMenu">系統登入 :
-                                <span th:text="${user==null}?'未登入':${user.username}">xxx</span>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="signMenu">
-                                <th:block th:if="${user!=null}">
-                                    <li class="nav-item"><a class="dropdown-item" href="#" name="user_detail">用戶資料</a>
-                                    </li>
-                                    <li class="nav-item"><a class="dropdown-item" href="#" name="logout">登出</a></li>
-                                </th:block>
-                                <th:block th:if="${user==null}">
-                                    <li class="nav-item"><a class="dropdown-item" href="#" name="login">登入</a></li>
-                                    <li class="nav-item"><a class="dropdown-item" href="#" name="regist">註冊</a></li>
-                                </th:block>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-        </nav>
+            <div class="collapse navbar-collapse" id="items">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" name='explore' href="/explore/">檔案檢視</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" name='tag' href="/tag0/">標籤</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" name='tagType' href="/tagType/">標籤類型</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" id="signMenu">系統登入 :
+                            <span th:text="${user==null}?'未登入':${user.username}">xxx</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="signMenu">
+                            <th:block th:if="${user!=null}">
+                                <li class="nav-item"><a class="dropdown-item" href="#" name="user_detail">用戶資料</a>
+                                </li>
+                                <li class="nav-item"><a class="dropdown-item" href="#" name="logout">登出</a></li>
+                            </th:block>
+                            <th:block th:if="${user==null}">
+                                <li class="nav-item"><a class="dropdown-item" href="#" name="login">登入</a></li>
+                                <li class="nav-item"><a class="dropdown-item" href="#" name="regist">註冊</a></li>
+                            </th:block>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown" th:if="${(user!=null) &&(#arrays.contains(user.roles,'ADMIN'))}">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" id="backendMenu">後台管理</a>
+                        <ul class="dropdown-menu" aria-labelledby="backendMenu">
+                            <li class="nav-item">
+                                <a class="dropdown-item" name='admin_user' href="#">使用者管理</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+    </nav>
+</div>
+
+
+<div class="container">
+    <div class="row align-item-center">
+        <h1 class="col-12 text-center text-primary" th:text="${message}">
+            Welcome
+        </h1>
     </div>
+</div>
 
-
-    <div class="container">
-        <div class="row align-item-center">
-            <h1 class="col-12 text-center text-primary" th:text="${message}">
-                Welcome
-            </h1>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
 </body>

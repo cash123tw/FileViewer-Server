@@ -3,8 +3,8 @@ server:
 
 file-explore:
   explore:
-    scan-path: C:\Users\BabyPig\IdeaProjects
-    start-mode: non
+    scan-path: D:\HoneyWell
+    start-mode: rescan
     hide-path: true
   word2pdf:
     download-location: C:\Users\BabyPig\IdeaProjects\.tmp

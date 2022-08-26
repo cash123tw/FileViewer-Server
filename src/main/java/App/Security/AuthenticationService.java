@@ -6,6 +6,7 @@ import Data.Repository.UserInfoRepository;
 import Web.Service.UserInfoService;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +46,7 @@ public class AuthenticationService {
             UserInfo userInfo
                     = jwtTokenCenter.VerifyJWT_UserInfo(token);
             return userInfo;
-        }catch (JWTVerificationException e){
+        }catch (JWTVerificationException | JsonProcessingException e){
             e.printStackTrace();
             throw new AuthenticationException("不合法的Token");
         }

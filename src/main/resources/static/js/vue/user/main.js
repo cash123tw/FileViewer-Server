@@ -20,8 +20,14 @@ const app = Vue.createApp({
     },
     methods:{
         cancel:cancel,
-        updatePassword:updatePassword
-    }
+        updatePassword:updatePassword,
+        getUserDetail:getUserDetail
+    },
+    mounted() {
+        let res = this.getUserDetail();
+        let user = JSON.parse(res.responseText);
+        this.user = user;
+    },
 })
 
 app.mount("#app")
@@ -30,6 +36,21 @@ function updatePassword(){
     if(this.oldOne === '' || this.oldOne == null){
         alert("密碼未輸入")
     }else if(this.newPassword == this.check && (this.newPassword!=null&&this.newPassword!=='')){
+        let data = {
+            oldPassword : this.oldOne,
+            newPassword:  this.newPassword
+        }
+        let res = $.ajax({
+            type: urls.user.updatePassword.method,
+            url: urls.user.updatePassword.url,
+            data: data,
+            async:false,
+            success: function (response) {
+                alert(response);
+                window.location = window.location;
+            }
+        });
+
         this.cancel();
     }else{
         this['check-alert'] = true 

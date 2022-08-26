@@ -1,25 +1,21 @@
 package App.Security;
 
+import App.Security.ExceptionHandler.CustomAuthenticateEntryPoint;
 import App.Security.Filter.CookieAuthenticateFilter;
+import App.Security.ExceptionHandler.RoleAccessFailHandler;
 import App.Security.Filter.UserPasswordAuthenticateFilter;
-import Data.Entity.Role;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTCreator;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.impl.JWTParser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import static Data.Entity.Role.*;
 
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -40,6 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .exceptionHandling()
                 .accessDeniedPage("/login")
+                .accessDeniedHandler(new RoleAccessFailHandler())
                 .authenticationEntryPoint(new CustomAuthenticateEntryPoint())
                 .and()
                 .formLogin()
@@ -52,7 +49,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, LOG_PREFIX+"/*").permitAll()
                 .antMatchers(HttpMethod.GET,LOG_PREFIX+"/**","/css/**","/js/**").permitAll()
-                .antMatchers("/admin/**").hasAnyAuthority(Role.ADMIN.name())
+                //Need role path
+                .antMatchers("/admin/**").hasAnyAuthority(ADMIN.name())
+                .antMatchers(HttpMethod.POST,"/explore/findByParam").authenticated()
+                .antMatchers(HttpMethod.PUT,"/user/").authenticated()
+                .antMatchers(HttpMethod.POST).hasAnyAuthority(EDIT.name(), ADMIN.name())
+                .antMatchers(HttpMethod.PUT).hasAnyAuthority(EDIT.name(), ADMIN.name())
+                .antMatchers(HttpMethod.DELETE).hasAnyAuthority(EDIT.name(), ADMIN.name())
                 .anyRequest().authenticated()
         ;
     }

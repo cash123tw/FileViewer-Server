@@ -30,9 +30,9 @@
                               :value="user.enabled?'啟用':'未啟用'">
                   </div>
                   <div class="justify-content-center d-flex m-2">
-                        <label class="me-4" for="role">權限</label>
+                        <label class="me-4">權限</label>
                         <span v-for="role in user.roles"
-                              class="border-2 border-top border-bottom rounded-1 px-2 shadow">{{role}}</span>
+                              class="border-2 border-top border-bottom rounded-1 px-2 shadow mx-2">{{role}}</span>
                   </div>
                   <div class="col-12 d-flex justify-content-center m-2">
                         <button type="button" class="col-4 btn btn-primary" data-bs-toggle="modal"
@@ -44,7 +44,7 @@
                   <div class="modal-dialog">
                         <div class="modal-content">
                               <div class="modal-header">
-                                    <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+                                    <h5 class="modal-title" id="staticBackdropLabel">密碼變更</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                           aria-label="Close"></button>
                               </div>

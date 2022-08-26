@@ -10,6 +10,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.catalina.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -19,9 +22,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JWT_Token_Center {
+    private final static ObjectMapper mapper = new ObjectMapper();
+
     private final String JWT_SECRET_KEY;
     private final Algorithm algorithm;
 
+    public static final String TAG_USER = "user";
     public static final String TAG_ENABLE = "enable";
     public static final String TAG_USERNAME = "username";
     public static final String TAG_ROLES = "roles";
@@ -44,7 +50,7 @@ public class JWT_Token_Center {
         return verify.getClaims();
     }
 
-    public String GetJWT_UserInfo(UserInfo userInfo){
+    public String GetJWT_UserInfo(UserInfo userInfo) throws JsonProcessingException {
         boolean enabled = userInfo.isEnabled();
         String username = userInfo.getUsername();
 
@@ -52,27 +58,26 @@ public class JWT_Token_Center {
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
+        userInfo.setPassword(null);
 
         String token = GetEncoded(
                 JWT.create()
-                        .withClaim(TAG_USERNAME, username)
-                        .withClaim(TAG_ENABLE, enabled)
-                        .withClaim(TAG_ROLES, roles)
+                        .withClaim(TAG_USER,mapper.writeValueAsString(userInfo))
         );
 
         return token;
     }
 
-    public UserInfo VerifyJWT_UserInfo(String token){
+    public UserInfo VerifyJWT_UserInfo(String token) throws JsonProcessingException {
         Map<String, Claim> claims = VerifyToken(token);
-        String username = claims.get(TAG_USERNAME).asString();
-        Boolean enableKey = claims.get(TAG_ENABLE).asBoolean();
-        Role[] roles = claims.get(TAG_ROLES).asArray(Role.ADMIN.getClass());
+        UserInfo userInfo
+                = mapper.readerFor(UserInfo.class).readValue(claims.get(TAG_USER).asString());
+//        String username = claims.get(TAG_USERNAME).asString();
+//        Boolean enableKey = claims.get(TAG_ENABLE).asBoolean();
+//        Role[] roles = claims.get(TAG_ROLES).asArray(Role.ADMIN.getClass());
 
-        if (enableKey) {
-            return new UserInfo(username,null,roles){{
-                setEnabled(true);
-            }};
+        if (userInfo.isEnabled()) {
+            return userInfo;
         }else{
             return null;
         }

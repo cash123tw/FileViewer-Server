@@ -4,21 +4,25 @@ import App.Security.AuthenticationService;
 import Data.Entity.Role;
 import Data.Entity.UserInfo;
 import Data.Repository.UserInfoRepository;
+import lombok.extern.java.Log;
 import org.apache.catalina.User;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.config.web.servlet.oauth2.login.OAuth2LoginSecurityMarker;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import javax.annotation.PostConstruct;
 import javax.naming.AuthenticationException;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Log
 public class UserInfoService {
 
     @Autowired
@@ -27,6 +31,28 @@ public class UserInfoService {
     private AuthenticationService authenticationService;
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @PostConstruct
+    public void RegisterRootAccount() throws Exception {
+        String log_message = "";
+
+        Optional<UserInfo> root
+                = getUserByUserName("root");
+
+        if(root.isEmpty()) {
+            UserInfo rootUser
+                    = new UserInfo("root", "root", Role.ADMIN, Role.WATCH, Role.EDIT);
+            rootUser.setRealName("系統設定");
+            rootUser = saveUserInfo(rootUser);
+            rootUser.setEnabled(true);
+            updateUserInfo(rootUser);
+            log_message = "Root user registed username:[root] password:[root]";
+        }else{
+            log_message = "Root user was registed";
+        }
+
+        log.info(log_message);
+    }
 
     public Optional<UserInfo> getUserByUserName(String userName) {
         if (Strings.isEmpty(userName))
@@ -63,6 +89,7 @@ public class UserInfoService {
         UserInfo old_userInfo
                 = getUserByUserName(userInfo.getUsername()).get();
         userInfo.setPassword(old_userInfo.getPassword());
+        userInfo.setId(old_userInfo.getId());
         userInfo.addAuthority(Role.WATCH);
         UserInfo new_save
                 = userInfoRepository.save(userInfo);
@@ -81,8 +108,11 @@ public class UserInfoService {
 
     public UserInfo updatePassword(UserInfo userInfo,String oldPasswordCheck,String newPassword) throws AuthenticationException {
 //       If no throw any exception express password check ok.
-        authenticationService.authenticate(userInfo.getUsername(), oldPasswordCheck);
+        userInfo
+                = authenticationService.authenticate(userInfo.getUsername(), oldPasswordCheck);
         userInfo.setPassword(passwordEncoder.encode(newPassword));
-        return updateUserInfo(userInfo);
+        userInfo = userInfoRepository.save(userInfo);
+
+        return userInfo;
     }
 }

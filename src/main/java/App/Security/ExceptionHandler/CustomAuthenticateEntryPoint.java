@@ -1,6 +1,7 @@
-package App.Security;
+package App.Security.ExceptionHandler;
 
 import App.Security.Filter.CookieAuthenticateFilter;
+import App.Security.SecurityConfig;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

@@ -48,11 +48,11 @@ public class Controller_Role {
         return users;
     }
 
-    @PutMapping("/")
     /*
     If Edit UserInfo is nower Authentication owner
     This method will not edit anything.
      */
+    @PutMapping("/")
     public UserInfo updateUserInfo(@AuthenticationPrincipal UserInfo nowerUser,@RequestBody UserInfo userInfo) {
         if(!nowerUser.getUsername().equals(userInfo.getUsername())) {
             userInfo

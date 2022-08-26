@@ -48,13 +48,13 @@ public class UserInfo implements UserDetails {
     private Set<String> roles;
 
     public UserInfo() {
-
+        this.roles = new HashSet<>();
     }
 
     public UserInfo(String username, String password, Role... role) {
+        this();
         this.username = username;
         this.password = password;
-        this.roles = new HashSet<>();
         if (Objects.nonNull(role)) {
             Stream.of(role).forEach(r -> roles.add(r.name()));
         }

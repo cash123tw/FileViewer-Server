@@ -19,21 +19,19 @@ import java.io.InputStream;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Objects;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/")
 public class Controller_Welcome {
 
     @GetMapping
-    public ModelAndView welcome(ModelAndView mav, HttpServletRequest request, @AuthenticationPrincipal UserInfo user) {
-
-        String msg = "";
-
-        if (Objects.nonNull(user)) {
-            msg = user.getUsername();
-        }
+    public ModelAndView welcome(String message,ModelAndView mav, @AuthenticationPrincipal UserInfo user) {
+        message
+                = Optional.ofNullable(message)
+                        .orElse(String.format("歡迎登入 : %s",user.getRealName()));
         mav.setViewName("/main");
-        mav.addObject("message", "歡迎登入".concat(" ").concat(msg));
+        mav.addObject("message",message);
 
         return mav;
     }

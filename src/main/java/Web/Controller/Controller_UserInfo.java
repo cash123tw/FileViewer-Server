@@ -26,6 +26,9 @@ public class Controller_UserInfo {
 
     @GetMapping("/")
     public UserInfo getMineUserDetail(@AuthenticationPrincipal UserInfo userInfo) {
+        userInfo
+                = userInfoService.getUserByUserName(userInfo.getUsername()).get();
+        userInfo.setPassword(null);
         return userInfo;
     }
 
@@ -39,7 +42,9 @@ public class Controller_UserInfo {
         Integer status = 400;
 
         try {
-            userInfoService.updatePassword(nowerUser,oldPassword,newPassword);
+            userInfoService.updatePassword(nowerUser, oldPassword, newPassword);
+            status = 200;
+            message = "變更成功";
         } catch (AuthenticationException e) {
             message = e.getMessage();
         }
