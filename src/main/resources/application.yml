@@ -3,7 +3,7 @@ server:
 
 file-explore:
   explore:
-    scan-path: D:\HoneyWell
+    scan-path: C:\Mine\Arduino\arduino-1.8.19\drivers\CP210x_6.7
     start-mode: rescan
     hide-path: true
   word2pdf:
@@ -33,7 +33,7 @@ spring:
   datasource:
     username: root
     password:
-    url: jdbc:mysql://localhost:3306/File_Detail?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/Explore?createDatabaseIfNotExist=true
 
   jpa:
     show-sql: true

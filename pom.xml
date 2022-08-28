@@ -76,6 +76,16 @@
             <groupId>file.framework</groupId>
             <artifactId>FileExplore</artifactId>
             <version>1.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/FileExplore-1.1.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.util</groupId>
+            <artifactId>MineUtils</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/MineUtils-1.0.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -90,11 +100,6 @@
 <!--            <scope>test</scope>-->
         </dependency>
 
-        <dependency>
-            <groupId>org.util</groupId>
-            <artifactId>MineUtils</artifactId>
-            <version>1.0</version>
-        </dependency>
 
         <dependency>
             <groupId>com.aspose</groupId>

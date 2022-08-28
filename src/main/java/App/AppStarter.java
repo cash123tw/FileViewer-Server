@@ -1,18 +1,12 @@
 package App;
 
-import App.Security.AuthenticationService;
-import Data.Entity.Role;
-import Data.Entity.UserInfo;
-import Web.Service.UserInfoService;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.yaml.snakeyaml.Yaml;
 
 import java.awt.*;
@@ -21,7 +15,10 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static App.Init.Init.StartMode;
