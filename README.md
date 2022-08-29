@@ -80,7 +80,7 @@ include request path controller and service,all handle logic is here.
 Directory edit src/main/resources/[application.yml](https://github.com/cash123tw/FileViewer-Server/blob/main/src/main/resources/application.yml)
 setting your local database [`username`,`password`,`URL`] at Spring.Datasource and setting [`scan-path`,`start-mode`] at file-explore.explore
 ### Phase Release
-Package project to jar file,and add `Setting.yml` locate at same with jar file's directory,and setting [`username`,`password`,`URL`] at Spring.Datasource and setting [`scan-path`,`start-mode`] at file-explore.explore.
+Package project to jar file,and add `set.yml` locate at same with jar file's directory,and setting [`username`,`password`,`URL`] at Spring.Datasource and setting [`scan-path`,`start-mode`] at file-explore.explore.
 
 You can download already packaged file [here](https://drive.google.com/drive/folders/1nnkTsYp-WiSX1SuvMZePhjAAxKr7ADOh?usp=sharing)
 ### Custom param introduce
