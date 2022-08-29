@@ -1,19 +1,16 @@
-server:
-  port: 9090
-
 file-explore:
   explore:
     scan-path: C:\Mine\Arduino\arduino-1.8.19\drivers\CP210x_6.7
     start-mode: rescan
-    hide-path: true
+  #Use to encoded JWT Token
+  secret-key: Mine_Key...
+  #No Use
   word2pdf:
     download-location: C:\Users\BabyPig\IdeaProjects\.tmp
     suffix: "系統預設"
-  naming:
-    tag:
-      dir: Directory
-      file: file
-  secret-key: Mine_Key...
+
+server:
+  port: 9090
 
 spring:
   servlet:
@@ -36,7 +33,7 @@ spring:
     url: jdbc:mysql://localhost:3306/Explore?createDatabaseIfNotExist=true
 
   jpa:
-    show-sql: false
+    show-sql: true
     generate-ddl: true
     properties:
       hibernate:
@@ -47,6 +44,7 @@ spring:
 
   sql:
     init:
+      # Add MySql Function
       schema-locations:
         - "classpath:sql/function.sql"
       mode: always

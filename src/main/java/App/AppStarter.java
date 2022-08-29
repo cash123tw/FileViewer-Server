@@ -21,8 +21,8 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static App.Init.InitHibernateParam.StartMode;
-import static App.Init.InitHibernateParam.StartMode.*;
+import static App.Init.Init.StartMode;
+import static App.Init.Init.StartMode.*;
 
 @SpringBootApplication(scanBasePackages = {"Web.*", "App.*", "Data.Criteria"})
 @EntityScan(basePackages = {"Data.Entity"})
@@ -52,7 +52,7 @@ public class AppStarter {
     public static void printNetLocal() throws UnknownHostException {
         InetAddress localHost = InetAddress.getLocalHost();
         String hostName = localHost.getHostAddress();
-        log.info(String.format("Wifi : [%s]\tURL : [%s]", "Hello", "http://" + hostName + ":9090"));
+        log.info(String.format("URL : [%s]", "http://" + hostName + ":9090"));
     }
 
     public static void controlSystem(SystemOpt opt) throws Exception {

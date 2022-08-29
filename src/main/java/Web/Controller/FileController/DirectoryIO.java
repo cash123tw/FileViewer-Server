@@ -26,8 +26,8 @@ public class DirectoryIO {
     @PostMapping("/addDirectory")
     public FilePath addDirectory(@RequestParam String name, @RequestParam String path) throws FileAlreadyExistsException, FileNotFoundException, IllegalAccessException {
         path = Paths.get(path).toString();
-        if (path.equals("/")) {
-            path = path.replaceFirst("/", "");
+        if (path.equals("/")||path.equals("\\")) {
+            path = "";
         }
 
         FilePath newDirectory

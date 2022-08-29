@@ -13,14 +13,14 @@ import org.springframework.core.annotation.Order;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-import static App.Init.InitHibernateParam.*;
+import static App.Init.Init.*;
 
 @Configuration
 public class BeanSetter {
 
     @Value("${file-explore.explore.scan-path}")
     private String fileRoot;
-    @Value("${file-explore.explore.hide-path}")
+    @Value("true")
     private boolean hidePath;
     @Value("${file-explore.word2pdf.download-location}")
     private String w2p_location;
@@ -54,8 +54,8 @@ public class BeanSetter {
     }
 
     @Bean
-    public InitHibernateParam getInit() {
-        return new InitHibernateParam((StartMode) getStartMode().get("rescan"));
+    public Init getInit() {
+        return new Init((StartMode) getStartMode().get("rescan"));
     }
 
     @Bean

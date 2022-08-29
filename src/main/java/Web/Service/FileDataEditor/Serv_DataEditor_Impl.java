@@ -32,9 +32,9 @@ import java.util.Set;
 @NoArgsConstructor
 public class Serv_DataEditor_Impl implements Serv_DataEditor {
 
-    @Value("${file-explore.naming.tag.dir}")
+    @Value("Directory")
     public String TAG_NAME_DIR;
-    @Value("${file-explore.naming.tag.file}")
+    @Value("file")
     public String TAG_NAME_FILE;
 
     private FileExploreWorker exploreWorker;
