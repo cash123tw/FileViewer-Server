@@ -1,6 +1,6 @@
 file-explore:
   explore:
-    scan-path: C:\Mine\Arduino\arduino-1.8.19\drivers\CP210x_6.7
+#    scan-path: C:\Example
     start-mode: new
   #Use to encoded JWT Token
   secret-key: Mine_Key...
@@ -26,12 +26,13 @@ spring:
     view:
       prefix: /page
       suffix: .html
+    log-request-details: true
 
   datasource:
-    username: root
-    password:
-    url: jdbc:mysql://localhost:3306/Explore?&createDatabaseIfNotExist=true
-
+#    username: root
+#    password:
+#    url: jdbc:mysql://localhost:3306/Explore?&createDatabaseIfNotExist=true
+#
   jpa:
     show-sql: false
     generate-ddl: true
@@ -57,5 +58,4 @@ spring:
     mode: HTML
     prefix: classpath:/static/page
     suffix: .html
-
 

@@ -4,7 +4,7 @@ import { urls } from '../../modal/urls.js'
 import 'http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js'
 import { getUserDetail } from '../user/detail.js';
 
-const localhost = "//localhost:9090"
+const localhost = ""
 
 const app = Vue.createApp({
     data() {

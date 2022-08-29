@@ -42,9 +42,10 @@ public class AppStarter {
             """;
 
     public static void main(String[] args) throws Exception {
-        desktop = Desktop.getDesktop();
 //        Outer Setting is optional,If not set use classpath:application.yml
-        System.setProperty("spring.config.additional-location", "optional:file:Setting.yml");
+        String location = "optional:file:./set.yml";
+        System.setProperty("spring.config.additional-location",location);
+        desktop = Desktop.getDesktop();
         controlSystem(SystemOpt.RESTART);
         HumanPanelStart();
     }

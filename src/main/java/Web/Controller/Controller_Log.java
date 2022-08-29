@@ -90,7 +90,7 @@ public class Controller_Log {
 
         Cookie cookie = new Cookie(CookieAuthenticateFilter.COOKIE_NAME, token);
         cookie.setPath("/");
-        cookie.setSecure(true);
+//        cookie.setSecure(true);
         response.addCookie(cookie);
         response.sendRedirect("/");
     }

@@ -29,7 +29,7 @@
                     type: URLS.log.signIn.method,
                     data: target,
                     async: false,
-                    success: (data, xhr) => {
+                    success: (data, xhr,head) => {
                         hrefTo("/")
                     },
                     error: (data) => {
