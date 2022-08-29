@@ -1,6 +1,5 @@
 package App.Init;
 
-import App.AppStarter;
 import Bean.PathProvider;
 import Worker.FileExploreWorker;
 import Worker.FileSaverWorker;
@@ -11,11 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 
-import javax.annotation.PostConstruct;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-import static App.Init.Init.*;
+import static App.Init.InitHibernateParam.*;
 
 @Configuration
 public class BeanSetter {
@@ -56,8 +54,8 @@ public class BeanSetter {
     }
 
     @Bean
-    public Init getInit() {
-        return new Init((StartMode) getStartMode().get("rescan"));
+    public InitHibernateParam getInit() {
+        return new InitHibernateParam((StartMode) getStartMode().get("rescan"));
     }
 
     @Bean

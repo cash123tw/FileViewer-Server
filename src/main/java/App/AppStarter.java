@@ -21,8 +21,8 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static App.Init.Init.StartMode;
-import static App.Init.Init.StartMode.*;
+import static App.Init.InitHibernateParam.StartMode;
+import static App.Init.InitHibernateParam.StartMode.*;
 
 @SpringBootApplication(scanBasePackages = {"Web.*", "App.*", "Data.Criteria"})
 @EntityScan(basePackages = {"Data.Entity"})
@@ -43,7 +43,8 @@ public class AppStarter {
 
     public static void main(String[] args) throws Exception {
         desktop = Desktop.getDesktop();
-        System.setProperty("spring.config.additional-location", "optional:file:scanSet.yml");
+//        Outer Setting is optional,If not set use classpath:application.yml
+        System.setProperty("spring.config.additional-location", "optional:file:Setting.yml");
         controlSystem(SystemOpt.RESTART);
         HumanPanelStart();
     }

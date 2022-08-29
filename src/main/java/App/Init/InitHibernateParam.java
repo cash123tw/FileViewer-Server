@@ -16,11 +16,11 @@ import org.springframework.transaction.annotation.SpringTransactionAnnotationPar
 
 @NoArgsConstructor
 @Order(2)
-public class Init implements ApplicationListener<ContextRefreshedEvent>, MetadataBuilderContributor {
+public class InitHibernateParam implements ApplicationListener<ContextRefreshedEvent>, MetadataBuilderContributor {
 
     private StartMode startMode;
 
-    public Init(StartMode startMode) {
+    public InitHibernateParam(StartMode startMode) {
         this.startMode = startMode;
     }
 
