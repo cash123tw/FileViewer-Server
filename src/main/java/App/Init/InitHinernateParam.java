@@ -19,11 +19,11 @@ import org.springframework.transaction.annotation.SpringTransactionAnnotationPar
 /**
  * Use to Init Hibernate Param
  */
-public class Init implements ApplicationListener<ContextRefreshedEvent>, MetadataBuilderContributor {
+public class InitHinernateParam implements ApplicationListener<ContextRefreshedEvent>, MetadataBuilderContributor {
 
     private StartMode startMode;
 
-    public Init(StartMode startMode) {
+    public InitHinernateParam(StartMode startMode) {
         this.startMode = startMode;
     }
 

@@ -10,10 +10,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 
+import javax.sql.DataSource;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-import static App.Init.Init.*;
+import static App.Init.InitHinernateParam.*;
 
 @Configuration
 public class BeanSetter {
@@ -54,8 +55,8 @@ public class BeanSetter {
     }
 
     @Bean
-    public Init getInit() {
-        return new Init((StartMode) getStartMode().get("rescan"));
+    public InitHinernateParam getInit() {
+        return new InitHinernateParam((StartMode) getStartMode().get("rescan"));
     }
 
     @Bean

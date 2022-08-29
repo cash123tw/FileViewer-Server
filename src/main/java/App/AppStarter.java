@@ -21,8 +21,8 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static App.Init.Init.StartMode;
-import static App.Init.Init.StartMode.*;
+import static App.Init.InitHinernateParam.StartMode;
+import static App.Init.InitHinernateParam.StartMode.*;
 
 @SpringBootApplication(scanBasePackages = {"Web.*", "App.*", "Data.Criteria"})
 @EntityScan(basePackages = {"Data.Entity"})

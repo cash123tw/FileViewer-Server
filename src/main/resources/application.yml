@@ -1,7 +1,7 @@
 file-explore:
   explore:
     scan-path: C:\Mine\Arduino\arduino-1.8.19\drivers\CP210x_6.7
-    start-mode: rescan
+    start-mode: new
   #Use to encoded JWT Token
   secret-key: Mine_Key...
   #No Use
@@ -30,15 +30,15 @@ spring:
   datasource:
     username: root
     password:
-    url: jdbc:mysql://localhost:3306/Explore?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/Explore?&createDatabaseIfNotExist=true
 
   jpa:
-    show-sql: true
+    show-sql: false
     generate-ddl: true
     properties:
       hibernate:
         format_sql: false
-        metadata_builder_contributor: App.Init.Init
+        metadata_builder_contributor: App.Init.InitHinernateParam
         dialect: org.hibernate.dialect.MySQL8Dialect
     open-in-view: false
 
