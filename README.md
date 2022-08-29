@@ -1,4 +1,8 @@
-## [Inroduce Video](https://)
+# --External Resources--
+
+* [Inroduce Video](https://)
+
+* [Packaged File Download](https://drive.google.com/drive/folders/1nnkTsYp-WiSX1SuvMZePhjAAxKr7ADOh?usp=sharing)
 
 # --System Configure--
 * Java Version : `jdk-17`
