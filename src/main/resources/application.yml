@@ -1,7 +1,7 @@
 file-explore:
   explore:
 #    scan-path: C:\Example
-    start-mode: new
+#    start-mode: new
   #Use to encoded JWT Token
   secret-key: Mine_Key...
   #No Use
@@ -30,11 +30,11 @@ spring:
 
   datasource:
 #    username: root
-#    password:
+#    password: null
 #    url: jdbc:mysql://localhost:3306/Explore?&createDatabaseIfNotExist=true
 #
   jpa:
-    show-sql: false
+    show-sql: true
     generate-ddl: true
     properties:
       hibernate:

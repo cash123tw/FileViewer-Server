@@ -1,0 +1,7 @@
+file-explore:
+  explore: {scan-path: './', start-mode: RESCAN}
+  secret-key: Mine_Key...
+  word2pdf: {download-location: 'C:\.tmp', suffix: System}
+  already-config: false
+spring:
+  datasource: {username: , password: '', url: ''}
