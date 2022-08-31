@@ -1,6 +1,6 @@
 # --External Resources--
 
-* [Inroduce Video](https://)
+* [Inroduce Video](https://www.youtube.com/watch?v=5nUnsQeJJTg&t=0s)
 
 * [Packaged File Download](https://drive.google.com/drive/folders/1nnkTsYp-WiSX1SuvMZePhjAAxKr7ADOh?usp=sharing)
 
