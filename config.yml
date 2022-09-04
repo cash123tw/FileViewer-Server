@@ -1,7 +1,7 @@
 file-explore:
-  explore: {scan-path: './', start-mode: RESCAN}
+  explore: {scan-path: 'C:\Users\BabyPig\Downloads', start-mode: RESCAN}
   secret-key: Mine_Key...
   word2pdf: {download-location: 'C:\.tmp', suffix: System}
-  already-config: false
+  already-config: true
 spring:
-  datasource: {username: , password: '', url: ''}
+  datasource: {username: root, password: '', url: 'jdbc:mysql://localhost:3306/test?&createDatabaseIfNotExist=true'}
